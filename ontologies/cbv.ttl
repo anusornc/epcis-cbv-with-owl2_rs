@@ -1,0 +1,210 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix cbv: <urn:epcglobal:cbv:> .
+@prefix epcis: <urn:epcglobal:epcis:> .
+@prefix gs1: <urn:epcglobal:sgln:> .
+
+# Core Business Vocabulary (CBV) - Extended Business Steps
+cbv:BizStep a rdfs:Class ;
+    rdfs:label "Business Step" ;
+    rdfs:comment "A business step in the supply chain process" .
+
+# Manufacturing Business Steps
+cbv:assembling a cbv:BizStep ;
+    rdfs:label "Assembling" ;
+    rdfs:comment "Putting components together to create a product" .
+
+cbv:manufacturing a cbv:BizStep ;
+    rdfs:label "Manufacturing" ;
+    rdfs:comment "Creating or producing a product" .
+
+cbv:production a cbv:BizStep ;
+    rdfs:label "Production" ;
+    rdfs:comment "The process of making goods" .
+
+cbv:testing a cbv:BizStep ;
+    rdfs:label "Testing" ;
+    rdfs:comment "Testing products for quality assurance" .
+
+cbv:quality_control a cbv:BizStep ;
+    rdfs:label "Quality Control" ;
+    rdfs:comment "Quality control processes" .
+
+# Logistics Business Steps
+cbv:loading a cbv:BizStep ;
+    rdfs:label "Loading" ;
+    rdfs:comment "Loading goods onto a vehicle" .
+
+cbv:unloading a cbv:BizStep ;
+    rdfs:label "Unloading" ;
+    rdfs:comment "Unloading goods from a vehicle" .
+
+cbv:transporting a cbv:BizStep ;
+    rdfs:label "Transporting" ;
+    rdfs:comment "Transporting goods from one location to another" .
+
+cbv:storing a cbv:BizStep ;
+    rdfs:label "Storing" ;
+    rdfs:comment "Storing goods in a warehouse" .
+
+cbv:inventory_check a cbv:BizStep ;
+    rdfs:label "Inventory Check" ;
+    rdfs:comment "Checking inventory levels" .
+
+# Retail Business Steps
+cbv:pricing a cbv:BizStep ;
+    rdfs:label "Pricing" ;
+    rdfs:comment "Setting prices for products" .
+
+cbv:displaying a cbv:BizStep ;
+    rdfs:label "Displaying" ;
+    rdfs:comment "Displaying products for sale" .
+
+cbv:selling a cbv:BizStep ;
+    rdfs:label "Selling" ;
+    rdfs:comment "Selling products to customers" .
+
+cbv:customer_pickup a cbv:BizStep ;
+    rdfs:label "Customer Pickup" ;
+    rdfs:comment "Customer pickup of ordered products" .
+
+# Extended Dispositions
+cbv:Disposition a rdfs:Class ;
+    rdfs:label "Disposition" ;
+    rdfs:comment "The state or condition of an item" .
+
+# Ownership Dispositions
+cbv:owned a cbv:Disposition ;
+    rdfs:label "Owned" ;
+    rdfs:comment "Item is owned by the organization" .
+
+cbv:consigned a cbv:Disposition ;
+    rdfs:label "Consigned" ;
+    rdfs:comment "Item is consigned to another party" .
+
+cbv:in_transit a cbv:Disposition ;
+    rdfs:label "In Transit" ;
+    rdfs:comment "Item is currently being transported" .
+
+cbv:reserved a cbv:Disposition ;
+    rdfs:label "Reserved" ;
+    rdfs:comment "Item is reserved for a specific purpose" .
+
+# Quality Dispositions
+cbv:inspected a cbv:Disposition ;
+    rdfs:label "Inspected" ;
+    rdfs:comment "Item has been inspected" .
+
+cbv:certified a cbv:Disposition ;
+    rdfs:label "Certified" ;
+    rdfs:comment "Item has been certified" .
+
+cbv:recalled a cbv:Disposition ;
+    rdfs:label "Recalled" ;
+    rdfs:comment "Item has been recalled" .
+
+cbv:quarantined a cbv:Disposition ;
+    rdfs:label "Quarantined" ;
+    rdfs:comment "Item is quarantined" .
+
+cbv:destroyed a cbv:Disposition ;
+    rdfs:label "Destroyed" ;
+    rdfs:comment "Item has been destroyed" .
+
+# Extended Business Locations
+cbv:BusinessLocation a rdfs:Class ;
+    rdfs:label "Business Location" ;
+    rdfs:comment "A location where business activities occur" .
+
+cbv:Factory a cbv:BusinessLocation ;
+    rdfs:label "Factory" ;
+    rdfs:comment "A manufacturing facility" .
+
+cbv:Warehouse a cbv:BusinessLocation ;
+    rdfs:label "Warehouse" ;
+    rdfs:comment "A storage facility" .
+
+cbv:DistributionCenter a cbv:BusinessLocation ;
+    rdfs:label "Distribution Center" ;
+    rdfs:comment "A facility for distributing goods" .
+
+cbv:RetailStore a cbv:BusinessLocation ;
+    rdfs:label "Retail Store" ;
+    rdfs:comment "A retail establishment" .
+
+cbv:Store a cbv:BusinessLocation ;
+    rdfs:label "Store" ;
+    rdfs:comment "A store location" .
+
+cbv:ShippingArea a cbv:BusinessLocation ;
+    rdfs:label "Shipping Area" ;
+    rdfs:comment "Area designated for shipping activities" .
+
+cbv:ReceivingArea a cbv:BusinessLocation ;
+    rdfs:label "Receiving Area" ;
+    rdfs:comment "Area designated for receiving goods" .
+
+cbv:ProductionLine a cbv:BusinessLocation ;
+    rdfs:label "Production Line" ;
+    rdfs:comment "A manufacturing production line" .
+
+# Business Transaction Types
+cbv:BusinessTransaction a rdfs:Class ;
+    rdfs:label "Business Transaction" ;
+    rdfs:comment "A business transaction between parties" .
+
+cbv:PurchaseOrder a cbv:BusinessTransaction ;
+    rdfs:label "Purchase Order" ;
+    rdfs:comment "A purchase order transaction" .
+
+cbv:SalesOrder a cbv:BusinessTransaction ;
+    rdfs:label "Sales Order" ;
+    rdfs:comment "A sales order transaction" .
+
+cbv:Invoice a cbv:BusinessTransaction ;
+    rdfs:label "Invoice" ;
+    rdfs:comment "An invoice transaction" .
+
+cbv:ShipmentNotice a cbv:BusinessTransaction ;
+    rdfs:label "Shipment Notice" ;
+    rdfs:comment "A shipment notice transaction" .
+
+cbv:Receipt a cbv:BusinessTransaction ;
+    rdfs:label "Receipt" ;
+    rdfs:comment "A receipt transaction" .
+
+# Sensor and IoT Extensions
+cbv:SensorReading a rdfs:Class ;
+    rdfs:label "Sensor Reading" ;
+    rdfs:comment "A sensor reading associated with an event" .
+
+cbv:TemperatureReading a cbv:SensorReading ;
+    rdfs:label "Temperature Reading" ;
+    rdfs:comment "Temperature sensor reading" .
+
+cbv:HumidityReading a cbv:SensorReading ;
+    rdfs:label "Humidity Reading" ;
+    rdfs:comment "Humidity sensor reading" .
+
+cbv:ShockReading a cbv:SensorReading ;
+    rdfs:label "Shock Reading" ;
+    rdfs:comment "Shock or vibration sensor reading" .
+
+cbv:LocationReading a cbv:SensorReading ;
+    rdfs:label "Location Reading" ;
+    rdfs:comment "GPS or location sensor reading" .
+
+# Standard Actions
+cbv:ADD a epcis:action ;
+    rdfs:label "Add" ;
+    rdfs:comment "Add an object to the system" .
+
+cbv:OBSERVE a epcis:action ;
+    rdfs:label "Observe" ;
+    rdfs:comment "Observe an object in the system" .
+
+cbv:DELETE a epcis:action ;
+    rdfs:label "Delete" ;
+    rdfs:comment "Delete an object from the system" .

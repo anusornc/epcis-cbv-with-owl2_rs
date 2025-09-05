@@ -1,0 +1,163 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix epcis: <urn:epcglobal:epcis:> .
+@prefix cbv: <urn:epcglobal:cbv:> .
+@prefix ex: <http://example.com/> .
+
+# EPCIS 2.0 Core Vocabulary
+epcis:ObjectEvent a owl:Class ;
+    rdfs:label "Object Event" ;
+    rdfs:comment "An event that records the association of objects with a business step" ;
+    rdfs:subClassOf epcis:Event .
+
+epcis:AggregationEvent a owl:Class ;
+    rdfs:label "Aggregation Event" ;
+    rdfs:comment "An event that records the physical aggregation of objects" ;
+    rdfs:subClassOf epcis:Event .
+
+epcis:QuantityEvent a owl:Class ;
+    rdfs:label "Quantity Event" ;
+    rdfs:comment "An event that records the quantity of objects" ;
+    rdfs:subClassOf epcis:Event .
+
+epcis:TransactionEvent a owl:Class ;
+    rdfs:label "Transaction Event" ;
+    rdfs:comment "An event that records a business transaction" ;
+    rdfs:subClassOf epcis:Event .
+
+epcis:TransformationEvent a owl:Class ;
+    rdfs:label "Transformation Event" ;
+    rdfs:comment "An event that records the transformation of objects" ;
+    rdfs:subClassOf epcis:Event .
+
+epcis:Event a owl:Class ;
+    rdfs:label "Event" ;
+    rdfs:comment "Base class for all EPCIS events" .
+
+# Core Properties
+epcis:eventID a owl:DatatypeProperty ;
+    rdfs:label "Event ID" ;
+    rdfs:comment "Unique identifier for the event" ;
+    rdfs:domain epcis:Event ;
+    rdfs:range xsd:string .
+
+epcis:eventTime a owl:DatatypeProperty ;
+    rdfs:label "Event Time" ;
+    rdfs:comment "Time when the event occurred" ;
+    rdfs:domain epcis:Event ;
+    rdfs:range xsd:dateTime .
+
+epcis:recordTime a owl:DatatypeProperty ;
+    rdfs:label "Record Time" ;
+    rdfs:comment "Time when the event was recorded" ;
+    rdfs:domain epcis:Event ;
+    rdfs:range xsd:dateTime .
+
+epcis:eventType a owl:DatatypeProperty ;
+    rdfs:label "Event Type" ;
+    rdfs:comment "Type of the event" ;
+    rdfs:domain epcis:Event ;
+    rdfs:range xsd:string .
+
+epcis:action a owl:DatatypeProperty ;
+    rdfs:label "Action" ;
+    rdfs:comment "Action performed on the object" ;
+    rdfs:domain epcis:ObjectEvent ;
+    rdfs:range xsd:string .
+
+epcis:epcList a owl:ObjectProperty ;
+    rdfs:label "EPC List" ;
+    rdfs:comment "List of EPCs involved in the event" ;
+    rdfs:domain epcis:ObjectEvent ;
+    rdfs:range xsd:string .
+
+epcis:bizStep a owl:DatatypeProperty ;
+    rdfs:label "Business Step" ;
+    rdfs:comment "Business step in which the event occurred" ;
+    rdfs:domain epcis:Event ;
+    rdfs:range xsd:string .
+
+epcis:disposition a owl:DatatypeProperty ;
+    rdfs:label "Disposition" ;
+    rdfs:comment "Disposition of the objects" ;
+    rdfs:domain epcis:Event ;
+    rdfs:range xsd:string .
+
+epcis:bizLocation a owl:ObjectProperty ;
+    rdfs:label "Business Location" ;
+    rdfs:comment "Location where the event occurred" ;
+    rdfs:domain epcis:Event ;
+    rdfs:range ex:Location .
+
+# Core Business Vocabulary (CBV)
+cbv:COMMISSIONING a owl:NamedIndividual ;
+    rdfs:label "Commissioning" ;
+    rdfs:comment "Business step for commissioning objects" .
+
+cbv:ENCODING a owl:NamedIndividual ;
+    rdfs:label "Encoding" ;
+    rdfs:comment "Business step for encoding objects" .
+
+cbv:PACKING a owl:NamedIndividual ;
+    rdfs:label "Packing" ;
+    rdfs:comment "Business step for packing objects" .
+
+cbv:SHIPPING a owl:NamedIndividual ;
+    rdfs:label "Shipping" ;
+    rdfs:comment "Business step for shipping objects" .
+
+cbv:RECEIVING a owl:NamedIndividual ;
+    rdfs:label "Receiving" ;
+    rdfs:comment "Business step for receiving objects" .
+
+cbv:INSPECTING a owl:NamedIndividual ;
+    rdfs:label "Inspecting" ;
+    rdfs:comment "Business step for inspecting objects" .
+
+cbv:ACTIVE a owl:NamedIndividual ;
+    rdfs:label "Active" ;
+    rdfs:comment "Disposition indicating active status" .
+
+cbv:INACTIVE a owl:NamedIndividual ;
+    rdfs:label "Inactive" ;
+    rdfs:comment "Disposition indicating inactive status" .
+
+cbv:EXPIRED a owl:NamedIndividual ;
+    rdfs:label "Expired" ;
+    rdfs:comment "Disposition indicating expired status" .
+
+cbv:DAMAGED a owl:NamedIndividual ;
+    rdfs:label "Damaged" ;
+    rdfs:comment "Disposition indicating damaged status" .
+
+# Location Class
+ex:Location a owl:Class ;
+    rdfs:label "Location" ;
+    rdfs:comment "A location in the supply chain" .
+
+ex:Warehouse a owl:Class ;
+    rdfs:label "Warehouse" ;
+    rdfs:subClassOf ex:Location .
+
+ex:RetailStore a owl:Class ;
+    rdfs:label "Retail Store" ;
+    rdfs:subClassOf ex:Location .
+
+ex:DistributionCenter a owl:Class ;
+    rdfs:label "Distribution Center" ;
+    rdfs:subClassOf ex:Location .
+
+# Action Values
+epcis:ADD a owl:NamedIndividual ;
+    rdfs:label "Add" ;
+    rdfs:comment "Action to add an object" .
+
+epcis:OBSERVE a owl:NamedIndividual ;
+    rdfs:label "Observe" ;
+    rdfs:comment "Action to observe an object" .
+
+epcis:DELETE a owl:NamedIndividual ;
+    rdfs:label "Delete" ;
+    rdfs:comment "Action to delete an object" .

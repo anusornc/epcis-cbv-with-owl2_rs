@@ -13,10 +13,11 @@ categories = ["database", "web-programming", "science"]
 # Local owl2_rs library
 owl2_rs = { path = "../owl2_rs" }
 
-# RDF ecosystem - using minimal dependencies for now
-# oxigraph = "0.2"  # Disabled due to compilation issues
-# oxrdf = "0.2"
-# oxsdatatypes = "0.1"
+# RDF ecosystem - Using only parsing components to avoid RocksDB compilation issues
+oxrdf = "0.2"
+oxsdatatypes = "0.2"
+oxttl = "0.1"
+# oxigraph = "0.4"  # Disabled due to RocksDB compilation issues on macOS
 
 # Web framework and async
 axum = "0.7"
