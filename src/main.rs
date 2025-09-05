@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 use epcis_knowledge_graph::{EpcisKgError, Config};
 use epcis_knowledge_graph::ontology::loader::OntologyLoader;
 use epcis_knowledge_graph::storage::oxigraph_store::OxigraphStore;
-use epcis_knowledge_graph::ontology::reasoner::OntologyReasoner;
+use epcis_knowledge_graph::ontology::reasoner::{OntologyReasoner, ProfileValidationResult};
 use epcis_knowledge_graph::api::server::WebServer;
 use tracing::{info, Level};
 
@@ -89,6 +89,21 @@ enum Commands {
         /// Perform inference
         #[arg(short, long)]
         inference: bool,
+    },
+
+    /// Comprehensive OWL profile validation
+    Profile {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// OWL profile to validate (el, ql, rl, full)
+        #[arg(short, long, default_value = "el")]
+        profile: String,
+
+        /// Output format (json, text)
+        #[arg(short, long, default_value = "json")]
+        format: String,
     },
 
     /// Initialize the knowledge graph
@@ -199,6 +214,16 @@ async fn main() -> Result<(), EpcisKgError> {
                 final_db_path, final_profile, inference
             );
             perform_reasoning(&final_db_path, &final_profile, inference)?;
+        }
+        Commands::Profile { db_path, profile, format } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            let final_profile = if profile != "el" { profile } else { config.reasoning.default_profile.clone() };
+            
+            info!(
+                "Performing comprehensive OWL profile validation on knowledge graph at {} (profile: {})",
+                final_db_path, final_profile
+            );
+            perform_profile_validation(&final_db_path, &final_profile, &format)?;
         }
         Commands::Init { db_path, force } => {
             let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
@@ -451,6 +476,125 @@ fn show_configuration(config: &Config) -> Result<(), EpcisKgError> {
     println!("    - Auto Save: {}", config.persistence.auto_save);
     println!("    - Save Interval: {}s", config.persistence.save_interval);
     println!("    - Backup on Startup: {}", config.persistence.backup_on_startup);
+    
+    Ok(())
+}
+
+/// Perform comprehensive OWL profile validation
+fn perform_profile_validation(db_path: &str, profile: &str, format: &str) -> Result<(), EpcisKgError> {
+    let store = OxigraphStore::new(db_path)?;
+    let mut reasoner = OntologyReasoner::with_store(store);
+    
+    println!("Performing comprehensive OWL 2 {} profile validation", profile.to_uppercase());
+    
+    // Load ontologies for validation
+    let loader = OntologyLoader::new();
+    let mut validation_results = Vec::new();
+    
+    // Try to load and validate each ontology
+    let default_ontologies = vec![
+        "ontologies/epcis2.ttl".to_string(),
+        "ontologies/cbv.ttl".to_string(),
+    ];
+    
+    for ontology_file in &default_ontologies {
+        if std::path::Path::new(ontology_file).exists() {
+            println!("Validating ontology: {}", ontology_file);
+            
+            match loader.load_ontology(ontology_file) {
+                Ok(ontology_data) => {
+                    match reasoner.validate_owl_profile_comprehensive(&ontology_data, profile) {
+                        Ok(result) => {
+                            validation_results.push((ontology_file.clone(), result));
+                        },
+                        Err(e) => {
+                            eprintln!("✗ Failed to validate {}: {}", ontology_file, e);
+                        }
+                    }
+                },
+                Err(e) => {
+                    eprintln!("✗ Failed to load {}: {}", ontology_file, e);
+                }
+            }
+        }
+    }
+    
+    // Display results
+    if format == "json" {
+        let json_output = serde_json::json!({
+            "profile": profile,
+            "validation_results": validation_results,
+            "summary": {
+                "total_ontologies": validation_results.len(),
+                "conforming_ontologies": validation_results.iter().filter(|(_, r)| r.conforms).count(),
+                "non_conforming_ontologies": validation_results.iter().filter(|(_, r)| !r.conforms).count(),
+            }
+        });
+        println!("{}", serde_json::to_string_pretty(&json_output)?);
+    } else {
+        // Text format
+        println!("\n=== OWL 2 {} Profile Validation Results ===", profile.to_uppercase());
+        
+        for (file, result) in &validation_results {
+            println!("\n📄 {}", file);
+            println!("  Status: {}", if result.conforms { "✅ Conforms" } else { "❌ Non-conforming" });
+            
+            if !result.violations.is_empty() {
+                println!("  Violations:");
+                for violation in &result.violations {
+                    println!("    - {}", violation);
+                }
+            }
+            
+            println!("  Ontology Stats:");
+            println!("    - Total Axioms: {}", result.ontology_stats.total_axioms);
+            println!("    - Classes: {}", result.ontology_stats.classes);
+            println!("    - Properties: {}", result.ontology_stats.properties);
+            println!("    - Individuals: {}", result.ontology_stats.individuals);
+            
+            println!("  EPCIS Compliance:");
+            println!("    - EPCIS Classes: {}", if result.epcis_compliance.has_epcis_classes { "✅" } else { "❌" });
+            println!("    - CBV Vocabulary: {}", if result.epcis_compliance.has_cbv_vocabulary { "✅" } else { "❌" });
+            println!("    - Event Types: {}", if result.epcis_compliance.has_event_types { "✅" } else { "❌" });
+            println!("    - Vocabulary Extensions: {}", if result.epcis_compliance.has_vocabulary_extensions { "✅" } else { "❌" });
+            
+            println!("  Performance Indicators:");
+            println!("    - Estimated Classification Time: {}ms", result.performance_indicators.estimated_classification_time_ms);
+            println!("    - Estimated Realization Time: {}ms", result.performance_indicators.estimated_realization_time_ms);
+            println!("    - Complexity: {}", result.performance_indicators.ontology_complexity);
+            println!("    - Feasibility: {}", result.performance_indicators.reasoning_feasibility);
+            
+            if let Some(el_specific) = &result.el_specific {
+                println!("  EL Profile Analysis:");
+                println!("    - Existential Restrictions: {}", el_specific.existential_restrictions);
+                println!("    - Conjunctions: {}", el_specific.conjunctions);
+                println!("    - Optimization Potential: {}", if el_specific.el_optimization_potential { "✅" } else { "❌" });
+            }
+            
+            if let Some(ql_specific) = &result.ql_specific {
+                println!("  QL Profile Analysis:");
+                println!("    - Simple Inclusions: {}", ql_specific.simple_inclusions);
+                println!("    - Query Rewriting Potential: {}", if ql_specific.query_rewriting_potential { "✅" } else { "❌" });
+            }
+            
+            if let Some(rl_specific) = &result.rl_specific {
+                println!("  RL Profile Analysis:");
+                println!("    - Property Chains: {}", rl_specific.property_chains);
+                println!("    - Simple Rules: {}", rl_specific.simple_rules);
+                println!("    - Rule Safety: {}", if rl_specific.rule_safety { "✅" } else { "❌" });
+            }
+        }
+        
+        println!("\n=== Summary ===");
+        let total = validation_results.len();
+        let conforming = validation_results.iter().filter(|(_, r)| r.conforms).count();
+        let non_conforming = total - conforming;
+        
+        println!("Total ontologies: {}", total);
+        println!("Conforming: {}", conforming);
+        println!("Non-conforming: {}", non_conforming);
+        println!("Success rate: {:.1}%", (conforming as f64 / total as f64) * 100.0);
+    }
     
     Ok(())
 }

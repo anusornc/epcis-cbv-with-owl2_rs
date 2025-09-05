@@ -337,6 +337,266 @@ impl OntologyReasoner {
         Ok(())
     }
     
+    /// Comprehensive profile validation with detailed reporting
+    pub fn validate_owl_profile_comprehensive(&mut self, ontology_data: &OntologyData, profile: &str) -> Result<ProfileValidationResult, EpcisKgError> {
+        // Load ontology data first
+        self.load_ontology_data(ontology_data)?;
+        
+        // Convert to OWL 2 ontology
+        let owl_ontology = self.owl_ontology.as_ref().unwrap();
+        
+        // Use owl2_rs profile checker
+        let owl_profile = match profile.to_lowercase().as_str() {
+            "el" | "owl2el" => owl2_rs::owl2_profile::OwlProfile::EL,
+            "ql" | "owl2ql" => owl2_rs::owl2_profile::OwlProfile::QL,
+            "rl" | "owl2rl" => owl2_rs::owl2_profile::OwlProfile::RL,
+            "full" | "owl2" => owl2_rs::owl2_profile::OwlProfile::Full,
+            _ => {
+                return Err(EpcisKgError::Validation(format!("Unknown OWL profile: {}", profile)));
+            }
+        };
+        
+        let profile_result = owl2_rs::owl2_profile::check_profile_compliance(owl_ontology, owl_profile.clone());
+        
+        // Perform detailed analysis
+        let mut validation_result = ProfileValidationResult {
+            profile: profile.to_string(),
+            conforms: profile_result.conforms,
+            violations: profile_result.violations.clone(),
+            ontology_stats: self.analyze_ontology_structure(owl_ontology),
+            epcis_compliance: self.check_epcis_compliance(ontology_data),
+            reasoning_capabilities: self.analyze_reasoning_capabilities(owl_ontology),
+            performance_indicators: self.estimate_performance_characteristics(owl_ontology, &owl_profile),
+            el_specific: None,
+            ql_specific: None,
+            rl_specific: None,
+        };
+        
+        // Add profile-specific analysis
+        match owl_profile {
+            owl2_rs::owl2_profile::OwlProfile::EL => {
+                validation_result.el_specific = Some(self.analyze_el_profile(owl_ontology));
+            },
+            owl2_rs::owl2_profile::OwlProfile::QL => {
+                validation_result.ql_specific = Some(self.analyze_ql_profile(owl_ontology));
+            },
+            owl2_rs::owl2_profile::OwlProfile::RL => {
+                validation_result.rl_specific = Some(self.analyze_rl_profile(owl_ontology));
+            },
+            _ => {}
+        }
+        
+        Ok(validation_result)
+    }
+    
+    /// Analyze ontology structure
+    fn analyze_ontology_structure(&self, ontology: &owl2_rs::Ontology) -> OntologyStats {
+        let mut class_count = 0;
+        let mut property_count = 0;
+        let mut individual_count = 0;
+        let axiom_count = ontology.axioms.len();
+        
+        for axiom in &ontology.axioms {
+            match axiom {
+                owl2_rs::Axiom::Class(_) => class_count += 1,
+                owl2_rs::Axiom::ObjectProperty(_) => property_count += 1,
+                owl2_rs::Axiom::DataProperty(_) => property_count += 1,
+                owl2_rs::Axiom::Assertion(_) => individual_count += 1,
+            }
+        }
+        
+        OntologyStats {
+            total_axioms: axiom_count,
+            classes: class_count,
+            properties: property_count,
+            individuals: individual_count,
+        }
+    }
+    
+    /// Check EPCIS compliance
+    fn check_epcis_compliance(&self, ontology_data: &OntologyData) -> EpcisCompliance {
+        let mut has_epcis_classes = false;
+        let mut has_cbv_vocabulary = false;
+        let mut has_event_types = false;
+        let mut has_vocabulary_extensions = false;
+        
+        for triple in ontology_data.graph.iter() {
+            let subject_str = format!("{}", triple.subject);
+            let predicate_str = format!("{}", triple.predicate);
+            let object_str = format!("{}", triple.object);
+            
+            // Check for EPCIS core classes
+            if subject_str.contains("epcis") || object_str.contains("epcis") {
+                has_epcis_classes = true;
+                if subject_str.contains("Event") || object_str.contains("Event") {
+                    has_event_types = true;
+                }
+            }
+            
+            // Check for CBV (Core Business Vocabulary)
+            if subject_str.contains("cbv") || object_str.contains("cbv") {
+                has_cbv_vocabulary = true;
+            }
+            
+            // Check for vocabulary extensions
+            if subject_str.contains("extension") || object_str.contains("extension") {
+                has_vocabulary_extensions = true;
+            }
+        }
+        
+        EpcisCompliance {
+            has_epcis_classes,
+            has_cbv_vocabulary,
+            has_event_types,
+            has_vocabulary_extensions,
+        }
+    }
+    
+    /// Analyze reasoning capabilities
+    fn analyze_reasoning_capabilities(&self, ontology: &owl2_rs::Ontology) -> ReasoningCapabilities {
+        let mut has_class_hierarchy = false;
+        let mut has_property_hierarchy = false;
+        let mut has_complex_restrictions = false;
+        let mut has_individual_assertions = false;
+        
+        for axiom in &ontology.axioms {
+            match axiom {
+                owl2_rs::Axiom::Class(class_axiom) => {
+                    match class_axiom {
+                        owl2_rs::ClassAxiom::SubClassOf { .. } => has_class_hierarchy = true,
+                        owl2_rs::ClassAxiom::EquivalentClasses { .. } => has_class_hierarchy = true,
+                        _ => {}
+                    }
+                },
+                owl2_rs::Axiom::ObjectProperty(prop_axiom) => {
+                    match prop_axiom {
+                        owl2_rs::ObjectPropertyAxiom::SubObjectPropertyOf { .. } => has_property_hierarchy = true,
+                        owl2_rs::ObjectPropertyAxiom::EquivalentObjectProperties { .. } => has_property_hierarchy = true,
+                        _ => {}
+                    }
+                },
+                owl2_rs::Axiom::Assertion(_) => has_individual_assertions = true,
+                _ => {}
+            }
+        }
+        
+        ReasoningCapabilities {
+            supports_classification: has_class_hierarchy,
+            supports_realization: has_individual_assertions,
+            has_property_hierarchy,
+            has_complex_restrictions,
+        }
+    }
+    
+    /// Estimate performance characteristics
+    fn estimate_performance_characteristics(&self, ontology: &owl2_rs::Ontology, profile: &owl2_rs::owl2_profile::OwlProfile) -> PerformanceIndicators {
+        let axiom_count = ontology.axioms.len();
+        
+        let estimated_classification_time = match profile {
+            owl2_rs::owl2_profile::OwlProfile::EL => axiom_count * 2, // EL is very fast
+            owl2_rs::owl2_profile::OwlProfile::QL => axiom_count * 5, // QL is moderate
+            owl2_rs::owl2_profile::OwlProfile::RL => axiom_count * 10, // RL is slower
+            _ => axiom_count * 20, // Full OWL 2 is slowest
+        };
+        
+        let estimated_realization_time = estimated_classification_time * 3;
+        
+        PerformanceIndicators {
+            estimated_classification_time_ms: estimated_classification_time,
+            estimated_realization_time_ms: estimated_realization_time,
+            ontology_complexity: if axiom_count < 100 { "Low" } else if axiom_count < 1000 { "Medium" } else { "High" },
+            reasoning_feasibility: if axiom_count > 10000 { "Limited" } else { "Good" },
+        }
+    }
+    
+    /// Analyze EL profile specific characteristics
+    fn analyze_el_profile(&self, ontology: &owl2_rs::Ontology) -> ElProfileAnalysis {
+        let mut existential_restrictions = 0;
+        let mut conjunctions = 0;
+        let mut simple_class_expressions = 0;
+        
+        for axiom in &ontology.axioms {
+            match axiom {
+                owl2_rs::Axiom::Class(class_axiom) => {
+                    match class_axiom {
+                        owl2_rs::ClassAxiom::SubClassOf { sub_class, super_class } => {
+                            // Count existential restrictions
+                            if format!("{:?}", sub_class).contains("ObjectSomeValuesFrom") {
+                                existential_restrictions += 1;
+                            }
+                            // Count conjunctions
+                            if format!("{:?}", super_class).contains("ObjectIntersectionOf") {
+                                conjunctions += 1;
+                            }
+                        },
+                        _ => simple_class_expressions += 1,
+                    }
+                },
+                _ => {}
+            }
+        }
+        
+        ElProfileAnalysis {
+            existential_restrictions,
+            conjunctions,
+            simple_class_expressions,
+            el_optimization_potential: existential_restrictions > 0 || conjunctions > 0,
+        }
+    }
+    
+    /// Analyze QL profile specific characteristics
+    fn analyze_ql_profile(&self, ontology: &owl2_rs::Ontology) -> QlProfileAnalysis {
+        let existential_restrictions = 0;
+        let universal_restrictions = 0;
+        let mut simple_inclusions = 0;
+        
+        for axiom in &ontology.axioms {
+            match axiom {
+                owl2_rs::Axiom::Class(class_axiom) => {
+                    match class_axiom {
+                        owl2_rs::ClassAxiom::SubClassOf { .. } => simple_inclusions += 1,
+                        _ => {}
+                    }
+                },
+                _ => {}
+            }
+        }
+        
+        QlProfileAnalysis {
+            existential_restrictions,
+            universal_restrictions,
+            simple_inclusions,
+            query_rewriting_potential: simple_inclusions > 0,
+        }
+    }
+    
+    /// Analyze RL profile specific characteristics
+    fn analyze_rl_profile(&self, ontology: &owl2_rs::Ontology) -> RlProfileAnalysis {
+        let mut complex_class_expressions = 0;
+        let mut property_chains = 0;
+        let mut simple_rules = 0;
+        
+        for axiom in &ontology.axioms {
+            match axiom {
+                owl2_rs::Axiom::Class(_) => simple_rules += 1,
+                owl2_rs::Axiom::ObjectProperty(prop_axiom) => {
+                    match prop_axiom {
+                        owl2_rs::ObjectPropertyAxiom::SubObjectPropertyOf { .. } => property_chains += 1,
+                        _ => {}
+                    }
+                },
+                _ => {}
+            }
+        }
+        
+        RlProfileAnalysis {
+            complex_class_expressions,
+            property_chains,
+            simple_rules,
+            rule_safety: complex_class_expressions < 100, // Arbitrary threshold
+        }
+    }
+    
     /// Perform EPCIS-specific profile checks
     fn perform_epcis_profile_checks(&self, ontology_data: &OntologyData, profile: &str) -> Result<(), EpcisKgError> {
         // EPCIS-specific validation for supply chain ontologies
@@ -387,4 +647,84 @@ impl OntologyReasoner {
             Ok("{\"reasoning_ready\": false, \"reason\": \"No store available\"}".to_string())
         }
     }
+}
+
+// Data structures for comprehensive profile validation
+
+/// Comprehensive result of profile validation
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct ProfileValidationResult {
+    pub profile: String,
+    pub conforms: bool,
+    pub violations: Vec<String>,
+    pub ontology_stats: OntologyStats,
+    pub epcis_compliance: EpcisCompliance,
+    pub reasoning_capabilities: ReasoningCapabilities,
+    pub performance_indicators: PerformanceIndicators,
+    pub el_specific: Option<ElProfileAnalysis>,
+    pub ql_specific: Option<QlProfileAnalysis>,
+    pub rl_specific: Option<RlProfileAnalysis>,
+}
+
+/// Statistics about the ontology structure
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct OntologyStats {
+    pub total_axioms: usize,
+    pub classes: usize,
+    pub properties: usize,
+    pub individuals: usize,
+}
+
+/// EPCIS compliance information
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct EpcisCompliance {
+    pub has_epcis_classes: bool,
+    pub has_cbv_vocabulary: bool,
+    pub has_event_types: bool,
+    pub has_vocabulary_extensions: bool,
+}
+
+/// Reasoning capabilities analysis
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct ReasoningCapabilities {
+    pub supports_classification: bool,
+    pub supports_realization: bool,
+    pub has_property_hierarchy: bool,
+    pub has_complex_restrictions: bool,
+}
+
+/// Performance indicators for reasoning
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct PerformanceIndicators {
+    pub estimated_classification_time_ms: usize,
+    pub estimated_realization_time_ms: usize,
+    pub ontology_complexity: &'static str,
+    pub reasoning_feasibility: &'static str,
+}
+
+/// EL profile specific analysis
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct ElProfileAnalysis {
+    pub existential_restrictions: usize,
+    pub conjunctions: usize,
+    pub simple_class_expressions: usize,
+    pub el_optimization_potential: bool,
+}
+
+/// QL profile specific analysis
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct QlProfileAnalysis {
+    pub existential_restrictions: usize,
+    pub universal_restrictions: usize,
+    pub simple_inclusions: usize,
+    pub query_rewriting_potential: bool,
+}
+
+/// RL profile specific analysis
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct RlProfileAnalysis {
+    pub complex_class_expressions: usize,
+    pub property_chains: usize,
+    pub simple_rules: usize,
+    pub rule_safety: bool,
 }
