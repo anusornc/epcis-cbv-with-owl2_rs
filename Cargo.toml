@@ -13,11 +13,13 @@ categories = ["database", "web-programming", "science"]
 # Local owl2_rs library
 owl2_rs = { path = "../owl2_rs" }
 
-# RDF ecosystem - Using only parsing components to avoid RocksDB compilation issues
+# RDF ecosystem - Using parsing components and in-memory SPARQL evaluation
 oxrdf = "0.2"
 oxsdatatypes = "0.2"
 oxttl = "0.1"
-# oxigraph = "0.4"  # Disabled due to RocksDB compilation issues on macOS
+spargebra = "0.3"  # SPARQL parsing
+spareval = "0.1"  # SPARQL evaluation
+sparesults = "0.2"  # SPARQL results handling
 
 # Web framework and async
 axum = "0.7"
