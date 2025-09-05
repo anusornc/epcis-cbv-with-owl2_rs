@@ -295,7 +295,7 @@ fn execute_query(query: &str, db_path: &str, format: &str) -> Result<(), EpcisKg
 /// Perform reasoning on the knowledge graph
 fn perform_reasoning(db_path: &str, profile: &str, inference: bool) -> Result<(), EpcisKgError> {
     let store = OxigraphStore::new(db_path)?;
-    let reasoner = OntologyReasoner::with_store(store);
+    let mut reasoner = OntologyReasoner::with_store(store);
     
     println!("Performing reasoning with OWL 2 {} profile", profile.to_uppercase());
     
