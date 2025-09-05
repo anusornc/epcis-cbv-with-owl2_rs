@@ -1,0 +1,7 @@
+{
+  "graphs": [
+    "urn:epcis:ontology:ontologies:epcis2.ttl",
+    "urn:epcis:ontology:ontologies:cbv.ttl"
+  ],
+  "created_at": "2025-09-05T15:43:01.245812+00:00"
+}

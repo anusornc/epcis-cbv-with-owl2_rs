@@ -30,6 +30,12 @@ pub enum EpcisKgError {
     
     #[error("Not implemented: {0}")]
     NotImplemented(String),
+    
+    #[error("JSON error: {0}")]
+    Json(#[from] serde_json::Error),
+    
+    #[error("RDF parsing error: {0}")]
+    RdfParsing(String),
 }
 
 #[derive(Debug, Clone, PartialEq)]
