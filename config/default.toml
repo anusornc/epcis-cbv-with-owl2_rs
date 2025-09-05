@@ -1,26 +1,38 @@
 # EPCIS Knowledge Graph Configuration
 
-[database]
-path = "./data"
-# max_size_mb = 1024
+# Database settings
+database_path = "./data"
+server_port = 8080
 
-[server]
-port = 8080
-host = "127.0.0.1"
+# Logging level: trace, debug, info, warn, error
+log_level = "info"
 
-[logging]
-level = "info"
-# format = "json"
+# Ontology paths (relative to project root or absolute paths)
+ontology_paths = [
+    "ontologies/epcis2.ttl",
+    "ontologies/cbv.ttl"
+]
 
-[ontologies]
-# Paths to ontology files (Turtle format)
-epcis_path = "ontologies/epcis.ttl"
-cbv_path = "ontologies/cbv.ttl"
-
+# Reasoning settings
 [reasoning]
-enabled = true
-profile = "RL"  # EL, QL, or RL
+default_profile = "el"  # OWL 2 profile: el, ql, rl
+enable_inference = true
+max_inference_time = 30  # seconds
 
-[performance]
-query_timeout_ms = 30000
-max_concurrent_queries = 100
+# SPARQL settings
+[sparql]
+max_query_time = 60  # seconds
+max_results = 1000  # maximum number of results to return
+enable_updates = true
+
+# Server settings
+[server]
+enable_cors = true
+cors_origins = ["*"]
+request_timeout = 30  # seconds
+
+# Persistence settings
+[persistence]
+auto_save = true
+save_interval = 300  # seconds (5 minutes)
+backup_on_startup = true

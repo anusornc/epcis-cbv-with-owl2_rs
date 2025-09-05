@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use epcis_knowledge_graph::EpcisKgError;
+use epcis_knowledge_graph::{EpcisKgError, Config};
 use epcis_knowledge_graph::ontology::loader::OntologyLoader;
 use epcis_knowledge_graph::storage::oxigraph_store::OxigraphStore;
 use epcis_knowledge_graph::ontology::reasoner::OntologyReasoner;
@@ -100,70 +100,101 @@ enum Commands {
         #[arg(short, long)]
         force: bool,
     },
+
+    /// Show current configuration
+    Config,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), EpcisKgError> {
     let args = Args::parse();
 
-    // Initialize logging
+    // Load configuration
+    let config = Config::from_file_or_default(&args.config)?;
+    config.validate()?;
+
+    // Initialize logging based on config and verbose flag
     let level = if args.verbose {
         Level::DEBUG
     } else {
-        Level::INFO
+        match config.log_level.as_str() {
+            "trace" => Level::TRACE,
+            "debug" => Level::DEBUG,
+            "info" => Level::INFO,
+            "warn" => Level::WARN,
+            "error" => Level::ERROR,
+            _ => Level::INFO,
+        }
     };
     tracing_subscriber::fmt().with_max_level(level).init();
 
-    info!("Starting EPCIS Knowledge Graph");
+    info!("Starting EPCIS Knowledge Graph with configuration from: {}", args.config);
 
     match args.command {
         Commands::Serve { port, db_path } => {
+            let final_port = if port != 8080 { port } else { config.server_port };
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
             info!(
                 "Starting server on port {} with database at {}",
-                port, db_path
+                final_port, final_db_path
             );
             // TODO: Implement server startup
             println!("Server functionality not yet implemented");
         }
         Commands::Load { files, db_path } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
             info!(
                 "Loading ontologies from {:?} into database at {}",
-                files, db_path
+                files, final_db_path
             );
-            load_ontologies(&files, &db_path)?;
+            load_ontologies(&files, &final_db_path)?;
         }
         Commands::Query {
             query,
             db_path,
             format,
         } => {
-            info!("Executing query against database at {}", db_path);
-            execute_query(&query, &db_path, &format)?;
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!("Executing query against database at {}", final_db_path);
+            execute_query(&query, &final_db_path, &format)?;
         }
         Commands::Validate {
             event_file,
             db_path,
         } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
             info!(
                 "Validating EPCIS events from {} against database at {}",
-                event_file, db_path
+                event_file, final_db_path
             );
             // TODO: Implement event validation
             println!("Event validation not yet implemented");
         }
         Commands::Reason { db_path, profile, inference } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            let final_profile = if profile != "el" { profile } else { config.reasoning.default_profile.clone() };
+            
             info!(
                 "Performing reasoning on knowledge graph at {} (profile: {}, inference: {})",
-                db_path, profile, inference
+                final_db_path, final_profile, inference
             );
-            perform_reasoning(&db_path, &profile, inference)?;
+            perform_reasoning(&final_db_path, &final_profile, inference)?;
         }
         Commands::Init { db_path, force } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
             info!(
                 "Initializing knowledge graph at {} (force: {})",
-                db_path, force
+                final_db_path, force
             );
-            initialize_knowledge_graph(&db_path, force)?;
+            initialize_knowledge_graph(&final_db_path, force, &config.ontology_paths)?;
+        }
+        Commands::Config => {
+            show_configuration(&config)?;
         }
     }
 
@@ -326,7 +357,7 @@ fn perform_reasoning(db_path: &str, profile: &str, inference: bool) -> Result<()
 }
 
 /// Initialize the knowledge graph
-fn initialize_knowledge_graph(db_path: &str, force: bool) -> Result<(), EpcisKgError> {
+fn initialize_knowledge_graph(db_path: &str, force: bool, default_ontologies: &[String]) -> Result<(), EpcisKgError> {
     let path = std::path::Path::new(db_path);
     
     if path.exists() && !force {
@@ -348,11 +379,6 @@ fn initialize_knowledge_graph(db_path: &str, force: bool) -> Result<(), EpcisKgE
     let mut store = OxigraphStore::new(db_path)?;
     
     // Load default ontologies if they exist
-    let default_ontologies = vec![
-        "ontologies/epcis2.ttl",
-        "ontologies/cbv.ttl",
-    ];
-    
     let mut loaded_count = 0;
     let loader = OntologyLoader::new();
     
@@ -379,6 +405,36 @@ fn initialize_knowledge_graph(db_path: &str, force: bool) -> Result<(), EpcisKgE
     println!("  - Loaded {} default ontologies", loaded_count);
     println!("  - Total triples: {}", stats.total_quads);
     println!("  - Named graphs: {}", stats.named_graphs);
+    
+    Ok(())
+}
+
+/// Show current configuration
+fn show_configuration(config: &Config) -> Result<(), EpcisKgError> {
+    println!("Current Configuration:");
+    println!("  Database Path: {}", config.database_path);
+    println!("  Server Port: {}", config.server_port);
+    println!("  Log Level: {}", config.log_level);
+    println!("  Ontology Paths:");
+    for path in &config.ontology_paths {
+        println!("    - {}", path);
+    }
+    println!("  Reasoning:");
+    println!("    - Default Profile: {}", config.reasoning.default_profile);
+    println!("    - Enable Inference: {}", config.reasoning.enable_inference);
+    println!("    - Max Inference Time: {}s", config.reasoning.max_inference_time);
+    println!("  SPARQL:");
+    println!("    - Max Query Time: {}s", config.sparql.max_query_time);
+    println!("    - Max Results: {}", config.sparql.max_results);
+    println!("    - Enable Updates: {}", config.sparql.enable_updates);
+    println!("  Server:");
+    println!("    - Enable CORS: {}", config.server.enable_cors);
+    println!("    - CORS Origins: {:?}", config.server.cors_origins);
+    println!("    - Request Timeout: {}s", config.server.request_timeout);
+    println!("  Persistence:");
+    println!("    - Auto Save: {}", config.persistence.auto_save);
+    println!("    - Save Interval: {}s", config.persistence.save_interval);
+    println!("    - Backup on Startup: {}", config.persistence.backup_on_startup);
     
     Ok(())
 }

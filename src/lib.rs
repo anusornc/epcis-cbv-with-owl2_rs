@@ -1,4 +1,5 @@
 pub mod api;
+pub mod config;
 pub mod models;
 pub mod ontology;
 pub mod storage;
@@ -36,26 +37,13 @@ pub enum EpcisKgError {
     
     #[error("RDF parsing error: {0}")]
     RdfParsing(String),
+    
+    #[error("TOML parsing error: {0}")]
+    Toml(#[from] toml::de::Error),
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct Config {
-    pub database_path: String,
-    pub server_port: u16,
-    pub log_level: String,
-    pub ontology_paths: Vec<String>,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            database_path: "./data".to_string(),
-            server_port: 8080,
-            log_level: "info".to_string(),
-            ontology_paths: vec![],
-        }
-    }
-}
+// Re-export the new AppConfig for backwards compatibility
+pub use config::AppConfig as Config;
 
 #[cfg(test)]
 mod tests {
