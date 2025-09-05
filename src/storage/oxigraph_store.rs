@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use oxrdf::Graph as OxrdfGraph;
 
+#[derive(Clone)]
 pub struct OxigraphStore {
     graphs: HashMap<String, OxrdfGraph>,
     storage_path: String,
@@ -320,7 +321,7 @@ struct StoreMetadata {
 }
 
 /// Statistics about the Oxigraph store
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, Default)]
 pub struct OxigraphStats {
     pub total_quads: usize,
     pub named_graphs: usize,

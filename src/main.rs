@@ -3,6 +3,7 @@ use epcis_knowledge_graph::{EpcisKgError, Config};
 use epcis_knowledge_graph::ontology::loader::OntologyLoader;
 use epcis_knowledge_graph::storage::oxigraph_store::OxigraphStore;
 use epcis_knowledge_graph::ontology::reasoner::OntologyReasoner;
+use epcis_knowledge_graph::api::server::WebServer;
 use tracing::{info, Level};
 
 #[derive(Parser, Debug)]
@@ -139,8 +140,23 @@ async fn main() -> Result<(), EpcisKgError> {
                 "Starting server on port {} with database at {}",
                 final_port, final_db_path
             );
-            // TODO: Implement server startup
-            println!("Server functionality not yet implemented");
+            
+            // Initialize the store
+            let store = OxigraphStore::new(&final_db_path)?;
+            
+            // Create and run the web server
+            let web_server = WebServer::new(config.clone(), store);
+            
+            println!("🚀 Starting EPCIS Knowledge Graph server...");
+            println!("📊 Server will be available at: http://localhost:{}", final_port);
+            println!("🔍 SPARQL endpoint: http://localhost:{}/api/v1/sparql", final_port);
+            println!("📖 API documentation: http://localhost:{}/", final_port);
+            println!("⏹️  Press Ctrl+C to stop the server");
+            
+            if let Err(e) = web_server.run(final_port).await {
+                eprintln!("❌ Server error: {}", e);
+                return Err(EpcisKgError::Config(format!("Failed to start server: {}", e)));
+            }
         }
         Commands::Load { files, db_path } => {
             let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
