@@ -1,0 +1,61 @@
+[package]
+name = "epcis-knowledge-graph"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "EPCIS Knowledge Graph demo combining owl2_rs reasoning with Oxigraph storage"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yourusername/epcis-knowledge-graph"
+keywords = ["epcis", "knowledge-graph", "owl2", "rdf", "sparql", "supply-chain"]
+categories = ["database", "web-programming", "science"]
+
+[dependencies]
+# Local owl2_rs library
+owl2_rs = { path = "../owl2_rs" }
+
+# RDF ecosystem - using minimal dependencies for now
+# oxigraph = "0.2"  # Disabled due to compilation issues
+# oxrdf = "0.2"
+# oxsdatatypes = "0.1"
+
+# Web framework and async
+axum = "0.7"
+tokio = { version = "1.0", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+quick-xml = "0.36"
+
+# Error handling and utilities
+thiserror = "1.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# CLI and configuration
+clap = { version = "4.0", features = ["derive"] }
+toml = "0.8"
+config = "0.14"
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+
+# UUID generation
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Date/time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+criterion = "0.5"
+tempfile = "3.8"
+assert_cmd = "2.0"
+predicates = "3.0"
+tokio-test = "0.4"
+
+# [[bench]]
+# name = "performance"
+# harness = false
