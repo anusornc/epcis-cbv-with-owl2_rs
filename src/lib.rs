@@ -2,6 +2,7 @@ pub mod api;
 pub mod config;
 pub mod models;
 pub mod ontology;
+pub mod pipeline;
 pub mod storage;
 pub mod utils;
 
@@ -40,6 +41,9 @@ pub enum EpcisKgError {
     
     #[error("TOML parsing error: {0}")]
     Toml(#[from] toml::de::Error),
+    
+    #[error("IRI parsing error: {0}")]
+    IriParse(#[from] oxrdf::IriParseError),
 }
 
 // Re-export the new AppConfig for backwards compatibility

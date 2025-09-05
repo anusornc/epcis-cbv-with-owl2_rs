@@ -24,6 +24,7 @@ sparesults = "0.2"  # SPARQL results handling
 # Web framework and async
 axum = "0.7"
 tokio = { version = "1.0", features = ["full"] }
+futures = "0.3"
 chrono = { version = "0.4", features = ["serde"] }
 tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "trace"] }

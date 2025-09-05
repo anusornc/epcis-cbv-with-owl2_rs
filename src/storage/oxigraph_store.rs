@@ -190,6 +190,30 @@ impl OxigraphStore {
         Ok(())
     }
     
+    /// Store event triples in a named graph (async version)
+    pub async fn store_event_triples(&mut self, event_id: &str, triples: &[oxrdf::Triple]) -> Result<(), EpcisKgError> {
+        // Create a named graph for this event
+        let graph_name = format!("urn:epcis:event:{}", event_id);
+        
+        // Create or get the graph
+        let mut graph = OxrdfGraph::default();
+        
+        // Add all triples to the graph
+        for triple in triples {
+            graph.insert(triple);
+        }
+        
+        // Store the graph
+        self.graphs.insert(graph_name, graph);
+        
+        // Save to persistent storage if not in-memory
+        if self.storage_path != ":memory:" {
+            self.save_graphs()?;
+        }
+        
+        Ok(())
+    }
+    
     /// Export all data as Turtle format
     pub fn export_turtle(&self) -> Result<String, EpcisKgError> {
         let mut turtle_output = String::new();

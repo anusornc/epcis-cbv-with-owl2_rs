@@ -2,7 +2,9 @@ use clap::{Parser, Subcommand};
 use epcis_knowledge_graph::{EpcisKgError, Config};
 use epcis_knowledge_graph::ontology::loader::OntologyLoader;
 use epcis_knowledge_graph::storage::oxigraph_store::OxigraphStore;
-use epcis_knowledge_graph::ontology::reasoner::{OntologyReasoner, ProfileValidationResult};
+use epcis_knowledge_graph::ontology::reasoner::OntologyReasoner;
+use epcis_knowledge_graph::pipeline::EpcisEventPipeline;
+use epcis_knowledge_graph::models::epcis::EpcisEvent;
 use epcis_knowledge_graph::api::server::WebServer;
 use tracing::{info, Level};
 
@@ -101,6 +103,21 @@ enum Commands {
         #[arg(short, long, default_value = "el")]
         profile: String,
 
+        /// Output format (json, text)
+        #[arg(short, long, default_value = "json")]
+        format: String,
+    },
+
+    /// Process EPCIS events
+    Process {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+        
+        /// Event file (JSON format)
+        #[arg(short, long)]
+        event_file: String,
+        
         /// Output format (json, text)
         #[arg(short, long, default_value = "json")]
         format: String,
@@ -224,6 +241,15 @@ async fn main() -> Result<(), EpcisKgError> {
                 final_db_path, final_profile
             );
             perform_profile_validation(&final_db_path, &final_profile, &format)?;
+        }
+        Commands::Process { db_path, event_file, format } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Processing EPCIS events from {} using knowledge graph at {}",
+                event_file, final_db_path
+            );
+            perform_event_processing(&final_db_path, &event_file, &format)?;
         }
         Commands::Init { db_path, force } => {
             let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
@@ -597,4 +623,108 @@ fn perform_profile_validation(db_path: &str, profile: &str, format: &str) -> Res
     }
     
     Ok(())
+}
+
+/// Perform EPCIS event processing
+fn perform_event_processing(db_path: &str, event_file: &str, format: &str) -> Result<(), EpcisKgError> {
+    let store = OxigraphStore::new(db_path)?;
+    let reasoner = OntologyReasoner::with_store(store.clone());
+    
+    println!("Processing EPCIS events from: {}", event_file);
+    
+    // Load events from file
+    let events = load_events_from_file(event_file)?;
+    println!("Loaded {} events from file", events.len());
+    
+    // Create event processing pipeline
+    let config = Config::default();
+    let mut pipeline = futures::executor::block_on(EpcisEventPipeline::new(
+        config,
+        store,
+        reasoner,
+    ))?;
+    
+    // Process events
+    let start_time = std::time::Instant::now();
+    let results = futures::executor::block_on(pipeline.process_events_batch(events));
+    let processing_time = start_time.elapsed();
+    
+    // Display results
+    if format == "json" {
+        let json_output = serde_json::json!({
+            "event_file": event_file,
+            "total_events": results.len(),
+            "successful_events": results.iter().filter(|r| r.success).count(),
+            "failed_events": results.iter().filter(|r| !r.success).count(),
+            "total_processing_time_ms": processing_time.as_millis() as u64,
+            "average_processing_time_ms": results.iter()
+                .map(|r| r.processing_time_ms as f64)
+                .sum::<f64>() / results.len() as f64,
+            "total_triples_generated": results.iter().map(|r| r.triples_generated).sum::<usize>(),
+            "total_inferences_made": results.iter().map(|r| r.inferences_made).sum::<usize>(),
+            "results": results,
+            "pipeline_stats": pipeline.get_stats()
+        });
+        println!("{}", serde_json::to_string_pretty(&json_output)?);
+    } else {
+        // Text format
+        println!("\n=== EPCIS Event Processing Results ===");
+        println!("Event file: {}", event_file);
+        println!("Total events: {}", results.len());
+        println!("Processing time: {:?}", processing_time);
+        
+        let successful = results.iter().filter(|r| r.success).count();
+        let failed = results.iter().filter(|r| !r.success).count();
+        
+        println!("Successful events: {}", successful);
+        println!("Failed events: {}", failed);
+        println!("Success rate: {:.1}%", (successful as f64 / results.len() as f64) * 100.0);
+        
+        let total_triples: usize = results.iter().map(|r| r.triples_generated).sum();
+        let total_inferences: usize = results.iter().map(|r| r.inferences_made).sum();
+        let avg_processing_time = results.iter()
+            .map(|r| r.processing_time_ms as f64)
+            .sum::<f64>() / results.len() as f64;
+        
+        println!("Total triples generated: {}", total_triples);
+        println!("Total inferences made: {}", total_inferences);
+        println!("Average processing time: {:.2}ms", avg_processing_time);
+        
+        // Show failed events
+        if failed > 0 {
+            println!("\n=== Failed Events ===");
+            for result in &results {
+                if !result.success {
+                    println!("✗ Event {}: {}", result.event_id, result.error.as_deref().unwrap_or("Unknown error"));
+                }
+            }
+        }
+        
+        // Show pipeline statistics
+        let stats = pipeline.get_stats();
+        println!("\n=== Pipeline Statistics ===");
+        println!("Total events processed: {}", stats.total_events_processed);
+        println!("Successful events: {}", stats.successful_events);
+        println!("Failed events: {}", stats.failed_events);
+        println!("Validation errors: {}", stats.validation_errors);
+        println!("Processing errors: {}", stats.processing_errors);
+        println!("Average processing time: {:.2}ms", stats.average_processing_time_ms);
+        
+        if let Some(last_time) = stats.last_processed_time {
+            println!("Last processed: {}", last_time);
+        }
+    }
+    
+    Ok(())
+}
+
+/// Load EPCIS events from a JSON file
+fn load_events_from_file(file_path: &str) -> Result<Vec<EpcisEvent>, EpcisKgError> {
+    let content = std::fs::read_to_string(file_path)
+        .map_err(|e| EpcisKgError::Io(e))?;
+    
+    let events: Vec<EpcisEvent> = serde_json::from_str(&content)
+        .map_err(|e| EpcisKgError::Json(e))?;
+    
+    Ok(events)
 }
