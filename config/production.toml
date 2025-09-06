@@ -1,0 +1,71 @@
+# Production Configuration
+
+[server]
+host = "0.0.0.0"
+port = 8080
+enable_cors = true
+cors_origins = ["*"]
+request_timeout = 30
+max_request_size = 10485760  # 10MB
+workers = 4
+
+[database]
+path = "/var/lib/epcis-kg/data"
+max_connections = 100
+connection_timeout = 30
+pool_size = 10
+
+[reasoning]
+enable_inference = true
+default_profile = "EL"
+max_inference_time = 300
+parallel_processing = true
+cache_size_limit = 50000
+batch_size = 5000
+materialization_strategy = "Incremental"
+
+[sparql]
+max_query_time = 60
+max_results = 10000
+enable_updates = true
+query_cache_size = 1000
+
+[monitoring]
+enable_metrics = true
+metrics_interval = 30
+enable_alerts = true
+alert_check_interval = 60
+performance_alerts = true
+log_level = "info"
+
+[logging]
+level = "info"
+console_output = true
+file_output = true
+log_directory = "/var/log/epcis-kg"
+max_file_size_mb = 100
+max_files = 10
+include_timestamps = true
+include_request_ids = true
+format = "json"
+
+[persistence]
+auto_save = true
+save_interval = 300
+backup_on_startup = true
+backup_directory = "/var/backups/epcis-kg"
+max_backups = 7
+
+[security]
+enable_auth = false
+auth_provider = "none"
+api_key_required = false
+rate_limit = 1000
+rate_limit_window = 60
+
+[performance]
+memory_limit_mb = 8192
+cpu_limit_percent = 80
+enable_gzip = true
+cache_ttl = 3600
+connection_pool_size = 20

@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  epcis-knowledge-graph:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - epcis-data:/var/lib/epcis-kg/data
+      - epcis-logs:/var/log/epcis-kg
+      - epcis-backups:/var/backups/epcis-kg
+    environment:
+      - RUST_LOG=info
+      - RUST_BACKTRACE=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - epcis-network
+
+  # Optional: Database for persistence (if using external DB)
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: epcis_kg
+      POSTGRES_USER: epcis
+      POSTGRES_PASSWORD: epcis_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - epcis-network
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - epcis-network
+
+  # Optional: Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - epcis-network
+
+  # Optional: Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - epcis-network
+
+volumes:
+  epcis-data:
+  epcis-logs:
+  epcis-backups:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  epcis-network:
+    driver: bridge

@@ -1,0 +1,71 @@
+# Development Configuration
+
+[server]
+host = "127.0.0.1"
+port = 8080
+enable_cors = true
+cors_origins = ["*"]
+request_timeout = 60
+max_request_size = 52428800  # 50MB
+workers = 2
+
+[database]
+path = "./data"
+max_connections = 10
+connection_timeout = 30
+pool_size = 5
+
+[reasoning]
+enable_inference = true
+default_profile = "EL"
+max_inference_time = 120
+parallel_processing = true
+cache_size_limit = 10000
+batch_size = 1000
+materialization_strategy = "OnDemand"
+
+[sparql]
+max_query_time = 30
+max_results = 1000
+enable_updates = true
+query_cache_size = 100
+
+[monitoring]
+enable_metrics = true
+metrics_interval = 10
+enable_alerts = true
+alert_check_interval = 30
+performance_alerts = true
+log_level = "debug"
+
+[logging]
+level = "debug"
+console_output = true
+file_output = false
+log_directory = "./logs"
+max_file_size_mb = 10
+max_files = 3
+include_timestamps = true
+include_request_ids = true
+format = "text"
+
+[persistence]
+auto_save = true
+save_interval = 60
+backup_on_startup = false
+backup_directory = "./backups"
+max_backups = 3
+
+[security]
+enable_auth = false
+auth_provider = "none"
+api_key_required = false
+rate_limit = 100
+rate_limit_window = 60
+
+[performance]
+memory_limit_mb = 2048
+cpu_limit_percent = 90
+enable_gzip = false
+cache_ttl = 1800
+connection_pool_size = 5
