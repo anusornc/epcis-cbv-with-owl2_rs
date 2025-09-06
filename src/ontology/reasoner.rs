@@ -7,8 +7,7 @@ use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 use rayon::prelude::*;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, RwLock};
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 pub struct OntologyReasoner {
     config: Config,
@@ -82,6 +81,30 @@ impl OntologyReasoner {
             batch_size: 1000,
         }
     }
+}
+
+// Clone implementation for OntologyReasoner
+impl Clone for OntologyReasoner {
+    fn clone(&self) -> Self {
+        Self {
+            config: self.config.clone(),
+            store: self.store.clone(),
+            owl_ontology: self.owl_ontology.clone(),
+            owl_reasoner: None,
+            reasoning_cache: self.reasoning_cache.clone(),
+            materialized_triples: self.materialized_triples.clone(),
+            inference_stats: self.inference_stats.clone(),
+            materialization_strategy: self.materialization_strategy.clone(),
+            parallel_processing: self.parallel_processing,
+            cache_size_limit: self.cache_size_limit,
+            performance_metrics: self.performance_metrics.clone(),
+            index_structures: self.index_structures.clone(),
+            batch_size: self.batch_size,
+        }
+    }
+}
+
+impl OntologyReasoner {
     
     /// Load ontology data into the OWL 2 reasoner
     pub fn load_ontology_data(&mut self, ontology_data: &OntologyData) -> Result<(), EpcisKgError> {
@@ -1278,6 +1301,21 @@ impl OntologyReasoner {
             .filter(|subject| subject.contains(property)) // Simplified matching
             .map(|s| s.to_string())
             .collect()
+    }
+    
+    /// Get parallel processing status
+    pub fn is_parallel_processing_enabled(&self) -> bool {
+        self.parallel_processing
+    }
+    
+    /// Get cache size limit
+    pub fn get_cache_size_limit(&self) -> usize {
+        self.cache_size_limit
+    }
+    
+    /// Get batch size for processing
+    pub fn get_batch_size(&self) -> usize {
+        self.batch_size
     }
 }
 

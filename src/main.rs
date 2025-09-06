@@ -261,7 +261,7 @@ async fn main() -> Result<(), EpcisKgError> {
             let store = OxigraphStore::new(&final_db_path)?;
             
             // Create and run the web server
-            let web_server = WebServer::new(config.clone(), store);
+            let web_server = WebServer::new(config.clone(), store).await?;
             
             println!("🚀 Starting EPCIS Knowledge Graph server...");
             println!("📊 Server will be available at: http://localhost:{}", final_port);

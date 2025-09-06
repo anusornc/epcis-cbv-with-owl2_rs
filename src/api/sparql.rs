@@ -198,7 +198,7 @@ async fn health_check() -> Json<serde_json::Value> {
 }
 
 // Helper function to determine query type
-fn determine_query_type(query: &str) -> String {
+pub fn determine_query_type(query: &str) -> String {
     let query_upper = query.to_uppercase();
     if query_upper.contains("SELECT") {
         "SELECT".to_string()
