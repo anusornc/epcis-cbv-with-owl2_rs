@@ -6,6 +6,8 @@ use epcis_knowledge_graph::ontology::reasoner::OntologyReasoner;
 use epcis_knowledge_graph::pipeline::EpcisEventPipeline;
 use epcis_knowledge_graph::models::epcis::EpcisEvent;
 use epcis_knowledge_graph::api::server::WebServer;
+use epcis_knowledge_graph::monitoring::metrics::{SystemMonitor, AlertConfig, AlertSeverity, AlertType};
+use epcis_knowledge_graph::monitoring::logging::{init_logging, LoggingConfig};
 use tracing::{info, Level};
 use std::time::Instant;
 
@@ -220,6 +222,25 @@ enum Commands {
         #[arg(short, long, default_value = "json")]
         format: String,
     },
+
+    /// System monitoring and metrics
+    Monitor {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Action (metrics, alerts, health, status)
+        #[arg(required = true)]
+        action: String,
+
+        /// Output format (json, text)
+        #[arg(short, long, default_value = "json")]
+        format: String,
+
+        /// Limit for alerts (default: 10)
+        #[arg(long, default_value = "10")]
+        limit: usize,
+    },
 }
 
 #[tokio::main]
@@ -230,20 +251,24 @@ async fn main() -> Result<(), EpcisKgError> {
     let config = Config::from_file_or_default(&args.config)?;
     config.validate()?;
 
-    // Initialize logging based on config and verbose flag
-    let level = if args.verbose {
-        Level::DEBUG
-    } else {
-        match config.log_level.as_str() {
-            "trace" => Level::TRACE,
-            "debug" => Level::DEBUG,
-            "info" => Level::INFO,
-            "warn" => Level::WARN,
-            "error" => Level::ERROR,
-            _ => Level::INFO,
-        }
+    // Initialize structured logging system
+    let logging_config = LoggingConfig {
+        level: if args.verbose {
+            "debug".to_string()
+        } else {
+            config.log_level.clone()
+        },
+        console_output: true,
+        file_output: false,
+        log_directory: std::path::PathBuf::from("./logs"),
+        max_file_size_mb: 100,
+        max_files: 5,
+        include_timestamps: true,
+        include_request_ids: false,
+        format: epcis_knowledge_graph::monitoring::logging::LogFormat::Text,
     };
-    tracing_subscriber::fmt().with_max_level(level).init();
+    
+    init_logging(logging_config).map_err(|e| EpcisKgError::Config(format!("Failed to initialize logging: {}", e)))?;
 
     info!("Starting EPCIS Knowledge Graph with configuration from: {}", args.config);
 
@@ -388,6 +413,15 @@ async fn main() -> Result<(), EpcisKgError> {
                 final_db_path
             );
             perform_parallel_inference(&final_db_path, &format)?;
+        }
+        Commands::Monitor { db_path, action, format, limit } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Performing monitoring action '{}' using knowledge graph at {}",
+                action, final_db_path
+            );
+            perform_monitoring_action(&final_db_path, &action, format, limit)?;
         }
         Commands::Config => {
             show_configuration(&config)?;
@@ -1303,6 +1337,201 @@ fn run_performance_benchmark(reasoner: &mut OntologyReasoner) -> Result<(), Epci
     let metrics = reasoner.get_performance_metrics();
     println!("Cache hit rate: {:.1}%", metrics.cache_hit_rate() * 100.0);
     println!("Parallel operation rate: {:.1}%", metrics.parallel_operation_rate() * 100.0);
+    
+    Ok(())
+}
+
+/// Perform monitoring actions
+fn perform_monitoring_action(db_path: &str, action: &str, format: String, limit: usize) -> Result<(), EpcisKgError> {
+    let monitor = SystemMonitor::new();
+    
+    match action.to_lowercase().as_str() {
+        "metrics" => {
+            let metrics = monitor.get_metrics();
+            
+            if format == "json" {
+                let json_output = serde_json::json!({
+                    "action": "metrics",
+                    "timestamp": chrono::Utc::now().to_rfc3339(),
+                    "metrics": metrics
+                });
+                println!("{}", serde_json::to_string_pretty(&json_output)?);
+            } else {
+                println!("\n=== System Metrics ===");
+                println!("Uptime: {} seconds", metrics.uptime_seconds);
+                println!("Total requests: {}", metrics.total_requests);
+                println!("Successful requests: {}", metrics.successful_requests);
+                println!("Failed requests: {}", metrics.failed_requests);
+                println!("Average response time: {:.2}ms", metrics.avg_response_time_ms);
+                println!("Memory usage: {}MB", metrics.memory_usage_mb);
+                println!("CPU usage: {:.1}%", metrics.cpu_usage_percent);
+                println!("Active connections: {}", metrics.active_connections);
+                
+                println!("\nDatabase Metrics:");
+                println!("  Total triples: {}", metrics.database_metrics.total_triples);
+                println!("  Named graphs: {}", metrics.database_metrics.named_graphs);
+                println!("  Average query time: {:.2}ms", metrics.database_metrics.avg_query_time_ms);
+                println!("  Cache hit ratio: {:.2}", metrics.database_metrics.cache_hit_ratio);
+                println!("  Storage size: {}MB", metrics.database_metrics.storage_size_mb);
+                
+                println!("\nReasoning Metrics:");
+                println!("  Total inferences: {}", metrics.reasoning_metrics.total_inferences);
+                println!("  Average inference time: {:.2}ms", metrics.reasoning_metrics.avg_inference_time_ms);
+                println!("  Materialized triples: {}", metrics.reasoning_metrics.materialized_triples);
+                println!("  Reasoning cache hit ratio: {:.2}", metrics.reasoning_metrics.reasoning_cache_hit_ratio);
+                println!("  Materialization strategy: {}", metrics.reasoning_metrics.materialization_strategy);
+            }
+        },
+        "alerts" => {
+            let alerts = monitor.get_alerts(Some(limit));
+            let active_alerts = monitor.check_alerts();
+            
+            if format == "json" {
+                let json_output = serde_json::json!({
+                    "action": "alerts",
+                    "timestamp": chrono::Utc::now().to_rfc3339(),
+                    "alerts": alerts,
+                    "active_alerts": active_alerts,
+                    "total_alerts": alerts.len(),
+                    "active_count": active_alerts.len(),
+                    "limit": limit
+                });
+                println!("{}", serde_json::to_string_pretty(&json_output)?);
+            } else {
+                println!("\n=== System Alerts ===");
+                println!("Total alerts: {}", alerts.len());
+                println!("Active alerts: {}", active_alerts.len());
+                println!("Limit: {}", limit);
+                
+                if alerts.is_empty() {
+                    println!("✅ No alerts found");
+                } else {
+                    println!("\nRecent alerts:");
+                    for (i, alert) in alerts.iter().enumerate() {
+                        println!("  {}. [{:?}] {:?}: {}", i + 1, alert.severity, alert.alert_type, alert.message);
+                        println!("     ID: {} | Time: {}", alert.id, alert.timestamp);
+                        if !alert.context.is_object() || alert.context.as_object().map_or(false, |obj| !obj.is_empty()) {
+                            println!("     Context: {}", alert.context);
+                        }
+                        println!();
+                    }
+                }
+                
+                if !active_alerts.is_empty() {
+                    println!("Active alerts:");
+                    for alert in &active_alerts {
+                        println!("  ⚠️  [{:?}] {:?}: {}", alert.severity, alert.alert_type, alert.message);
+                    }
+                }
+            }
+        },
+        "health" => {
+            let metrics = monitor.get_metrics();
+            let alerts = monitor.check_alerts();
+            
+            let health_status = if alerts.is_empty() {
+                "healthy"
+            } else if alerts.iter().any(|a| matches!(a.severity, AlertSeverity::Critical)) {
+                "critical"
+            } else if alerts.iter().any(|a| matches!(a.severity, AlertSeverity::Error)) {
+                "degraded"
+            } else {
+                "warning"
+            };
+            
+            if format == "json" {
+                let json_output = serde_json::json!({
+                    "action": "health",
+                    "status": health_status,
+                    "timestamp": chrono::Utc::now().to_rfc3339(),
+                    "metrics": metrics,
+                    "alerts": alerts,
+                    "alert_count": alerts.len()
+                });
+                println!("{}", serde_json::to_string_pretty(&json_output)?);
+            } else {
+                println!("\n=== System Health Check ===");
+                println!("Overall Status: {}", health_status.to_uppercase());
+                
+                let status_icon = match health_status {
+                    "healthy" => "✅",
+                    "warning" => "⚠️ ",
+                    "degraded" => "🟡",
+                    "critical" => "🔴",
+                    _ => "❓"
+                };
+                println!("{} {}", status_icon, health_status.to_uppercase());
+                
+                println!("\nSystem Information:");
+                println!("  Uptime: {} seconds", metrics.uptime_seconds);
+                println!("  Memory usage: {}MB", metrics.memory_usage_mb);
+                println!("  CPU usage: {:.1}%", metrics.cpu_usage_percent);
+                println!("  Active connections: {}", metrics.active_connections);
+                
+                println!("\nPerformance:");
+                println!("  Total requests: {}", metrics.total_requests);
+                println!("  Successful requests: {}", metrics.successful_requests);
+                println!("  Failed requests: {}", metrics.failed_requests);
+                println!("  Average response time: {:.2}ms", metrics.avg_response_time_ms);
+                
+                if !alerts.is_empty() {
+                    println!("\nActive Alerts ({}):", alerts.len());
+                    for alert in &alerts {
+                        println!("  [{:?}] {:?}: {}", alert.severity, alert.alert_type, alert.message);
+                    }
+                } else {
+                    println!("\n✅ No active alerts");
+                }
+            }
+        },
+        "status" => {
+            let metrics = monitor.get_metrics();
+            let request_history = monitor.get_request_history(Some(10));
+            
+            if format == "json" {
+                let json_output = serde_json::json!({
+                    "action": "status",
+                    "timestamp": chrono::Utc::now().to_rfc3339(),
+                    "metrics": metrics,
+                    "recent_requests": request_history,
+                    "system_status": "operational"
+                });
+                println!("{}", serde_json::to_string_pretty(&json_output)?);
+            } else {
+                println!("\n=== System Status ===");
+                println!("System Status: ✅ Operational");
+                println!("Timestamp: {}", chrono::Utc::now().to_rfc3339());
+                
+                println!("\nKey Metrics:");
+                println!("  Uptime: {} seconds", metrics.uptime_seconds);
+                println!("  Memory: {}MB | CPU: {:.1}%", metrics.memory_usage_mb, metrics.cpu_usage_percent);
+                println!("  Requests: {} total | {} successful | {} failed", 
+                    metrics.total_requests, metrics.successful_requests, metrics.failed_requests);
+                println!("  Avg response time: {:.2}ms", metrics.avg_response_time_ms);
+                
+                println!("\nDatabase:");
+                println!("  Triples: {} | Graphs: {}", metrics.database_metrics.total_triples, metrics.database_metrics.named_graphs);
+                
+                println!("\nReasoning:");
+                println!("  Inferences: {} | Materialized: {}", 
+                    metrics.reasoning_metrics.total_inferences, metrics.reasoning_metrics.materialized_triples);
+                
+                if !request_history.is_empty() {
+                    println!("\nRecent Requests (last {}):", request_history.len().min(10));
+                    for (i, req) in request_history.iter().take(10).enumerate() {
+                        let status_icon = if req.success { "✅" } else { "❌" };
+                        println!("  {}. {} {} {} - {}ms", i + 1, status_icon, req.method, req.endpoint, req.duration_ms);
+                    }
+                }
+            }
+        },
+        _ => {
+            return Err(EpcisKgError::Config(format!(
+                "Unknown monitoring action: {}. Use 'metrics', 'alerts', 'health', or 'status'",
+                action
+            )));
+        }
+    }
     
     Ok(())
 }

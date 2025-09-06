@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     store.store_ontology_data(&cbv_ontology)?;
     
     // Create reasoner with store
-    let reasoner = OntologyReasoner::with_store(store);
+    let mut reasoner = OntologyReasoner::with_store(store);
     
     // Test ontology validation
     println!("\nTesting ontology validation...");

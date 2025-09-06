@@ -54,6 +54,10 @@ uuid = { version = "1.0", features = ["v4", "serde"] }
 # Parallel processing
 rayon = "1.8"
 
+# Test dependencies
+urlencoding = "2.1"
+parking_lot = "0.12.4"
+
 [dev-dependencies]
 criterion = "0.5"
 tempfile = "3.8"

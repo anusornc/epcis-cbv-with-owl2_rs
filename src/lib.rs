@@ -1,6 +1,7 @@
 pub mod api;
 pub mod config;
 pub mod models;
+pub mod monitoring;
 pub mod ontology;
 pub mod pipeline;
 pub mod storage;
@@ -62,7 +63,9 @@ mod tests {
         assert_eq!(config.database_path, "./data");
         assert_eq!(config.server_port, 8080);
         assert_eq!(config.log_level, "info");
-        assert!(config.ontology_paths.is_empty());
+        assert_eq!(config.ontology_paths.len(), 2);
+        assert!(config.ontology_paths.contains(&"ontologies/epcis2.ttl".to_string()));
+        assert!(config.ontology_paths.contains(&"ontologies/cbv.ttl".to_string()));
     }
 
     #[test]

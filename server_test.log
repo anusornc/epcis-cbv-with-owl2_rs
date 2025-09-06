@@ -1,0 +1,25 @@
+[2m2025-09-06T02:44:40.563054Z[0m [32m INFO[0m [2mepcis_knowledge_graph[0m[2m:[0m Starting EPCIS Knowledge Graph with configuration from: config/default.toml
+[2m2025-09-06T02:44:40.563147Z[0m [32m INFO[0m [2mepcis_knowledge_graph[0m[2m:[0m Starting server on port 8080 with database at ./data
+Warning: Turtle persistence is simplified - returning empty graph
+Warning: Turtle persistence is simplified - returning empty graph
+🚀 Starting EPCIS Knowledge Graph server...
+📊 Server will be available at: http://localhost:8080
+🔍 SPARQL endpoint: http://localhost:8080/api/v1/sparql
+📖 API documentation: http://localhost:8080/
+⏹️  Press Ctrl+C to stop the server
+[2m2025-09-06T02:44:40.565837Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m Starting web server on http://0.0.0.0:8080
+[2m2025-09-06T02:44:40.565851Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m Available endpoints:
+[2m2025-09-06T02:44:40.565859Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /health - Health check
+[2m2025-09-06T02:44:40.565882Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  / - API information
+[2m2025-09-06T02:44:40.565890Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/sparql - SPARQL endpoint (GET)
+[2m2025-09-06T02:44:40.565901Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/sparql - SPARQL endpoint (POST)
+[2m2025-09-06T02:44:40.565909Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/sparql/query - SPARQL query execution
+[2m2025-09-06T02:44:40.565917Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/statistics - Store statistics
+[2m2025-09-06T02:44:40.565925Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/ontologies - List ontologies
+[2m2025-09-06T02:44:40.565932Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/ontologies - Load ontology
+[2m2025-09-06T02:44:40.565940Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/events - Process EPCIS events
+[2m2025-09-06T02:44:40.565947Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/events - List recent events
+[2m2025-09-06T02:44:40.565955Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/inference - Perform reasoning
+[2m2025-09-06T02:44:40.565962Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/inference/stats - Get inference statistics
+[2m2025-09-06T02:44:40.565970Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/materialize - Manage materialized triples
+[2m2025-09-06T02:44:40.565978Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/performance - Get performance metrics

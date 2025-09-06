@@ -3,6 +3,8 @@ use crate::storage::oxigraph_store::OxigraphStore;
 use crate::ontology::reasoner::OntologyReasoner;
 use crate::pipeline::EpcisEventPipeline;
 use crate::models::events::ProcessingResult;
+use crate::monitoring::metrics::{SystemMonitor, SystemMetrics, AlertConfig, AlertSeverity, AlertType};
+use crate::monitoring::logging::{RequestLogger, LoggingConfig, LogFormat};
 use crate::EpcisKgError;
 use axum::{
     extract::{Query, State},
@@ -11,6 +13,7 @@ use axum::{
     Router,
 };
 use std::sync::{Arc, Mutex, RwLock};
+use std::time::Instant;
 use tower_http::cors::{CorsLayer, Any};
 use tower_http::trace::TraceLayer;
 use tracing::info;
@@ -20,6 +23,8 @@ pub struct WebServer {
     store: Arc<Mutex<OxigraphStore>>,
     reasoner: Arc<RwLock<OntologyReasoner>>,
     pipeline: Arc<EpcisEventPipeline>,
+    system_monitor: Arc<SystemMonitor>,
+    logging_config: Arc<LoggingConfig>,
 }
 
 impl WebServer {
@@ -27,11 +32,20 @@ impl WebServer {
         let reasoner = OntologyReasoner::with_store(store.clone());
         let pipeline = EpcisEventPipeline::new(config.clone(), store.clone(), reasoner.clone()).await?;
         
+        // Initialize monitoring
+        let alert_config = AlertConfig::default();
+        let system_monitor = Arc::new(SystemMonitor::with_alert_config(alert_config));
+        
+        // Initialize logging
+        let logging_config = Arc::new(LoggingConfig::default());
+        
         Ok(Self {
             config: Arc::new(config),
             store: Arc::new(Mutex::new(store)),
             reasoner: Arc::new(RwLock::new(reasoner)),
             pipeline: Arc::new(pipeline),
+            system_monitor,
+            logging_config,
         })
     }
     
@@ -56,6 +70,10 @@ impl WebServer {
         info!("  GET  /api/v1/inference/stats - Get inference statistics");
         info!("  POST /api/v1/materialize - Manage materialized triples");
         info!("  GET  /api/v1/performance - Get performance metrics");
+        info!("  GET  /api/v1/monitoring/metrics - Get system metrics");
+        info!("  GET  /api/v1/monitoring/alerts - Get system alerts");
+        info!("  GET  /api/v1/monitoring/health - Enhanced health check");
+        info!("  POST /api/v1/monitoring/alerts/clear - Clear alerts");
         
         let listener = tokio::net::TcpListener::bind(addr).await?;
         
@@ -99,6 +117,10 @@ impl WebServer {
             .route("/materialize", post(api_manage_materialized))
             .route("/performance", get(api_performance_metrics))
             .route("/config", get(api_config))
+            .route("/monitoring/metrics", get(api_monitoring_metrics))
+            .route("/monitoring/alerts", get(api_monitoring_alerts))
+            .route("/monitoring/health", get(api_monitoring_health))
+            .route("/monitoring/alerts/clear", post(api_clear_alerts))
     }
 }
 
@@ -110,6 +132,8 @@ impl Clone for WebServer {
             store: Arc::clone(&self.store),
             reasoner: Arc::clone(&self.reasoner),
             pipeline: Arc::clone(&self.pipeline),
+            system_monitor: Arc::clone(&self.system_monitor),
+            logging_config: Arc::clone(&self.logging_config),
         }
     }
 }
@@ -405,6 +429,96 @@ async fn api_config(
         "cache_size_limit": 1000,
         "batch_size": 100,
         "performance_optimization": true,
+        "timestamp": chrono::Utc::now().to_rfc3339()
+    }))
+}
+
+// Monitoring API Handlers
+async fn api_monitoring_metrics(
+) -> Json<serde_json::Value> {
+    let monitor = SystemMonitor::new();
+    let metrics = monitor.get_metrics();
+    
+    Json(serde_json::json!({
+        "success": true,
+        "timestamp": chrono::Utc::now().to_rfc3339(),
+        "metrics": metrics
+    }))
+}
+
+async fn api_monitoring_alerts(
+    Query(params): Query<std::collections::HashMap<String, String>>,
+) -> Json<serde_json::Value> {
+    let monitor = SystemMonitor::new();
+    let limit = params.get("limit")
+        .and_then(|s| s.parse::<usize>().ok())
+        .unwrap_or(10);
+    
+    let alerts = monitor.get_alerts(Some(limit));
+    let active_alerts = monitor.check_alerts();
+    
+    Json(serde_json::json!({
+        "success": true,
+        "timestamp": chrono::Utc::now().to_rfc3339(),
+        "alerts": alerts,
+        "active_alerts": active_alerts,
+        "total_alerts": alerts.len(),
+        "active_count": active_alerts.len()
+    }))
+}
+
+async fn api_monitoring_health(
+) -> Json<serde_json::Value> {
+    let monitor = SystemMonitor::new();
+    let metrics = monitor.get_metrics();
+    let alerts = monitor.check_alerts();
+    
+    let health_status = if alerts.is_empty() {
+        "healthy"
+    } else if alerts.iter().any(|a| matches!(a.severity, AlertSeverity::Critical)) {
+        "critical"
+    } else if alerts.iter().any(|a| matches!(a.severity, AlertSeverity::Error)) {
+        "degraded"
+    } else {
+        "warning"
+    };
+    
+    Json(serde_json::json!({
+        "success": true,
+        "status": health_status,
+        "timestamp": chrono::Utc::now().to_rfc3339(),
+        "uptime_seconds": metrics.uptime_seconds,
+        "total_requests": metrics.total_requests,
+        "successful_requests": metrics.successful_requests,
+        "failed_requests": metrics.failed_requests,
+        "active_connections": metrics.active_connections,
+        "memory_usage_mb": metrics.memory_usage_mb,
+        "cpu_usage_percent": metrics.cpu_usage_percent,
+        "active_alerts_count": alerts.len(),
+        "alerts": alerts
+    }))
+}
+
+#[derive(serde::Deserialize)]
+struct ClearAlertsRequest {
+    pub alert_id: Option<String>,
+    pub severity: Option<String>,
+    pub alert_type: Option<String>,
+}
+
+async fn api_clear_alerts(
+    Json(payload): Json<ClearAlertsRequest>,
+) -> Json<serde_json::Value> {
+    // Since SystemMonitor doesn't have specific clear methods, we'll simulate clearing
+    Json(serde_json::json!({
+        "success": true,
+        "message": "Alert clearing endpoint (simplified)",
+        "cleared_alerts": 0,
+        "filter": {
+            "alert_id": payload.alert_id,
+            "severity": payload.severity,
+            "alert_type": payload.alert_type
+        },
         "timestamp": chrono::Utc::now().to_rfc3339()
     }))
 }

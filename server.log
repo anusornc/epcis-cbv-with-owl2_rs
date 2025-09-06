@@ -1,0 +1,27 @@
+[2m2025-09-06T02:35:25.239015Z[0m [32m INFO[0m [2mepcis_knowledge_graph[0m[2m:[0m Starting EPCIS Knowledge Graph with configuration from: config/default.toml
+[2m2025-09-06T02:35:25.239112Z[0m [32m INFO[0m [2mepcis_knowledge_graph[0m[2m:[0m Starting server on port 8080 with database at ./data
+Warning: Turtle persistence is simplified - returning empty graph
+Warning: Turtle persistence is simplified - returning empty graph
+🚀 Starting EPCIS Knowledge Graph server...
+📊 Server will be available at: http://localhost:8080
+🔍 SPARQL endpoint: http://localhost:8080/api/v1/sparql
+📖 API documentation: http://localhost:8080/
+⏹️  Press Ctrl+C to stop the server
+[2m2025-09-06T02:35:25.244178Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m Starting web server on http://0.0.0.0:8080
+[2m2025-09-06T02:35:25.244202Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m Available endpoints:
+[2m2025-09-06T02:35:25.244212Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /health - Health check
+[2m2025-09-06T02:35:25.244239Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  / - API information
+[2m2025-09-06T02:35:25.244249Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/sparql - SPARQL endpoint (GET)
+[2m2025-09-06T02:35:25.244258Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/sparql - SPARQL endpoint (POST)
+[2m2025-09-06T02:35:25.244268Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/sparql/query - SPARQL query execution
+[2m2025-09-06T02:35:25.244277Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/statistics - Store statistics
+[2m2025-09-06T02:35:25.244286Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/ontologies - List ontologies
+[2m2025-09-06T02:35:25.244295Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/ontologies - Load ontology
+[2m2025-09-06T02:35:25.244304Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/events - Process EPCIS events
+[2m2025-09-06T02:35:25.244312Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/events - List recent events
+[2m2025-09-06T02:35:25.244321Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/inference - Perform reasoning
+[2m2025-09-06T02:35:25.244329Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/inference/stats - Get inference statistics
+[2m2025-09-06T02:35:25.244339Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   POST /api/v1/materialize - Manage materialized triples
+[2m2025-09-06T02:35:25.244348Z[0m [32m INFO[0m [2mepcis_knowledge_graph::api::server[0m[2m:[0m   GET  /api/v1/performance - Get performance metrics
+❌ Server error: Address already in use (os error 48)
+Error: Config("Failed to start server: Address already in use (os error 48)")

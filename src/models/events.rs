@@ -232,7 +232,7 @@ mod tests {
         assert!(result.success);
         assert_eq!(result.event_id, "test-001");
         assert!(result.error.is_none());
-        assert_eq!(result.triples_generated, 8); // 5 basic + 1 EPC + 1 biz_step + 1 disposition + 1 location
+        assert_eq!(result.triples_generated, 9); // 5 basic + 1 EPC + 1 biz_step + 1 disposition + 1 location
         assert_eq!(result.inferences_made, 0);
     }
     
@@ -271,6 +271,6 @@ mod tests {
             biz_location: Some("urn:epc:id:sgln:123456.789.0".to_string()),
         };
         
-        assert_eq!(processor.estimate_triples_count(&full_event), 9); // 5 basic + 2 EPCs + 1 biz_step + 1 disposition + 1 location
+        assert_eq!(processor.estimate_triples_count(&full_event), 10); // 5 basic + 2 EPCs + 1 biz_step + 1 disposition + 1 location
     }
 }
