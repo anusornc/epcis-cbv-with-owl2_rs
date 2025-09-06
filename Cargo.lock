@@ -646,6 +646,7 @@ dependencies = [
  "oxttl",
  "predicates",
  "quick-xml 0.36.2",
+ "rayon",
  "reqwest",
  "serde",
  "serde_json",

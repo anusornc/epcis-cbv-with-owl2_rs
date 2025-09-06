@@ -7,6 +7,7 @@ use epcis_knowledge_graph::pipeline::EpcisEventPipeline;
 use epcis_knowledge_graph::models::epcis::EpcisEvent;
 use epcis_knowledge_graph::api::server::WebServer;
 use tracing::{info, Level};
+use std::time::Instant;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -136,6 +137,89 @@ enum Commands {
 
     /// Show current configuration
     Config,
+
+    /// Perform inference with materialization
+    Infer {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Materialization strategy (full, incremental, ondemand, hybrid)
+        #[arg(short, long, default_value = "incremental")]
+        strategy: String,
+
+        /// Clear existing materialized triples before inference
+        #[arg(short, long)]
+        clear: bool,
+
+        /// Output format (json, text)
+        #[arg(short, long, default_value = "json")]
+        format: String,
+    },
+
+    /// Manage materialized triples
+    Materialize {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Action (show, clear, stats)
+        #[arg(required = true)]
+        action: String,
+
+        /// Graph name (optional, for specific graphs)
+        #[arg(short, long)]
+        graph: Option<String>,
+    },
+
+    /// Perform incremental inference on new data
+    Increment {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Path to file with new triples (Turtle format)
+        #[arg(short, long)]
+        triples_file: String,
+
+        /// Output format (json, text)
+        #[arg(short, long, default_value = "json")]
+        format: String,
+    },
+
+    /// Performance optimization commands
+    Optimize {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Action (configure, run, report, benchmark)
+        #[arg(required = true)]
+        action: String,
+
+        /// Enable parallel processing
+        #[arg(long)]
+        parallel: bool,
+
+        /// Cache size limit
+        #[arg(long, default_value = "10000")]
+        cache_limit: usize,
+
+        /// Batch size for processing
+        #[arg(long, default_value = "1000")]
+        batch_size: usize,
+    },
+
+    /// Perform parallel inference
+    ParallelInfer {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Output format (json, text)
+        #[arg(short, long, default_value = "json")]
+        format: String,
+    },
 }
 
 #[tokio::main]
@@ -259,6 +343,51 @@ async fn main() -> Result<(), EpcisKgError> {
                 final_db_path, force
             );
             initialize_knowledge_graph(&final_db_path, force, &config.ontology_paths)?;
+        }
+        Commands::Infer { db_path, strategy, clear, format } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Performing inference with materialization (strategy: {}, clear: {}) on knowledge graph at {}",
+                strategy, clear, final_db_path
+            );
+            perform_inference_with_materialization(&final_db_path, &strategy, clear, &format)?;
+        }
+        Commands::Materialize { db_path, action, graph } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Managing materialized triples (action: {}) on knowledge graph at {}",
+                action, final_db_path
+            );
+            manage_materialized_triples(&final_db_path, &action, &graph)?;
+        }
+        Commands::Increment { db_path, triples_file, format } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Performing incremental inference on new data from {} using knowledge graph at {}",
+                triples_file, final_db_path
+            );
+            perform_incremental_inference(&final_db_path, &triples_file, &format)?;
+        }
+        Commands::Optimize { db_path, action, parallel, cache_limit, batch_size } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Performing optimization action '{}' on knowledge graph at {}",
+                action, final_db_path
+            );
+            perform_optimization(&final_db_path, &action, parallel, cache_limit, batch_size)?;
+        }
+        Commands::ParallelInfer { db_path, format } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Performing parallel inference using knowledge graph at {}",
+                final_db_path
+            );
+            perform_parallel_inference(&final_db_path, &format)?;
         }
         Commands::Config => {
             show_configuration(&config)?;
@@ -727,4 +856,453 @@ fn load_events_from_file(file_path: &str) -> Result<Vec<EpcisEvent>, EpcisKgErro
         .map_err(|e| EpcisKgError::Json(e))?;
     
     Ok(events)
+}
+
+/// Perform inference with materialization
+fn perform_inference_with_materialization(db_path: &str, strategy: &str, clear: bool, format: &str) -> Result<(), EpcisKgError> {
+    let store = OxigraphStore::new(db_path)?;
+    let mut reasoner = OntologyReasoner::with_store(store);
+    
+    println!("Performing inference with materialization strategy: {}", strategy);
+    
+    // Set materialization strategy
+    let materialization_strategy = match strategy.to_lowercase().as_str() {
+        "full" => epcis_knowledge_graph::ontology::reasoner::MaterializationStrategy::Full,
+        "incremental" => epcis_knowledge_graph::ontology::reasoner::MaterializationStrategy::Incremental,
+        "ondemand" | "on-demand" => epcis_knowledge_graph::ontology::reasoner::MaterializationStrategy::OnDemand,
+        "hybrid" => epcis_knowledge_graph::ontology::reasoner::MaterializationStrategy::Hybrid,
+        _ => {
+            return Err(EpcisKgError::Config(format!("Unknown materialization strategy: {}", strategy)));
+        }
+    };
+    
+    reasoner.set_materialization_strategy(materialization_strategy.clone());
+    
+    // Clear existing materialized triples if requested
+    if clear {
+        println!("Clearing existing materialized triples...");
+        reasoner.clear_materialized_triples();
+    }
+    
+    // Load ontologies for inference
+    let loader = OntologyLoader::new();
+    let mut ontology_loaded = false;
+    
+    let ontology_files = vec!["ontologies/epcis2.ttl", "ontologies/cbv.ttl"];
+    
+    for file in ontology_files {
+        if std::path::Path::new(file).exists() {
+            match loader.load_ontology(file) {
+                Ok(ontology_data) => {
+                    match reasoner.load_ontology_data(&ontology_data) {
+                        Ok(()) => {
+                            println!("✓ Loaded ontology for inference: {}", file);
+                            ontology_loaded = true;
+                        },
+                        Err(e) => {
+                            eprintln!("✗ Failed to load ontology data for inference {}: {}", file, e);
+                        }
+                    }
+                },
+                Err(e) => {
+                    eprintln!("✗ Failed to load ontology {}: {}", file, e);
+                }
+            }
+        }
+    }
+    
+    if !ontology_loaded {
+        return Err(EpcisKgError::Validation("No ontologies loaded for inference".to_string()));
+    }
+    
+    // Perform inference with materialization
+    println!("Performing inference with materialization...");
+    let start_time = std::time::Instant::now();
+    
+    match reasoner.perform_inference_with_materialization() {
+        Ok(result) => {
+            let processing_time = start_time.elapsed();
+            
+            // Display results
+            if format == "json" {
+                let stats = reasoner.get_detailed_stats();
+                let json_output = serde_json::json!({
+                    "inference_result": result,
+                    "materialization_strategy": strategy,
+                    "processing_time_ms": processing_time.as_millis() as u64,
+                    "inference_stats": stats,
+                    "materialized_triples_count": reasoner.get_materialized_triples().len()
+                });
+                println!("{}", serde_json::to_string_pretty(&json_output)?);
+            } else {
+                // Text format
+                println!("\n=== Inference with Materialization Results ===");
+                println!("Strategy: {}", strategy);
+                println!("Processing time: {:?}", processing_time);
+                println!("Consistent: {}", if result.consistent { "✅ Yes" } else { "❌ No" });
+                println!("Classification performed: {}", if result.classification_performed { "✅ Yes" } else { "❌ No" });
+                println!("Realization performed: {}", if result.realization_performed { "✅ Yes" } else { "❌ No" });
+                println!("Materialized triples: {}", result.materialized_triples);
+                println!("SPARQL inferences: {}", result.sparql_inferences);
+                println!("Individuals classified: {}", result.individuals_classified);
+                println!("Incremental: {}", if result.incremental { "✅ Yes" } else { "❌ No" });
+                println!("New triples processed: {}", result.new_triples_processed);
+                
+                if !result.inference_errors.is_empty() {
+                    println!("\nInference Errors:");
+                    for error in &result.inference_errors {
+                        println!("  - {}", error);
+                    }
+                }
+                
+                // Show detailed statistics
+                let stats = reasoner.get_detailed_stats();
+                println!("\n=== Detailed Statistics ===");
+                println!("Total inferences: {}", stats.total_inferences);
+                println!("Incremental inferences: {}", stats.incremental_inferences);
+                println!("Full inferences: {}", stats.full_inferences);
+                println!("Materialized triples count: {}", stats.materialized_triples_count);
+                println!("Total processing time: {}ms", stats.total_processing_time_ms);
+                println!("Average processing time: {:.2}ms", stats.average_processing_time_ms);
+                println!("Cache hits: {}", stats.cache_hits);
+                println!("Cache misses: {}", stats.cache_misses);
+                println!("Cache hit rate: {:.2}%", stats.cache_hit_rate() * 100.0);
+                
+                // Show materialized triples sample
+                let materialized = reasoner.get_materialized_triples();
+                if !materialized.is_empty() {
+                    println!("\n=== Materialized Triples (Sample) ===");
+                    let mut count = 0;
+                    for (graph_name, triples) in materialized {
+                        for triple in triples {
+                            if count >= 5 { break; }
+                            println!("  {}. {} {} {}", count + 1, triple.subject, triple.predicate, triple.object);
+                            count += 1;
+                        }
+                        if count >= 5 { break; }
+                    }
+                    let total_triples: usize = materialized.values().map(|v| v.len()).sum();
+                    if total_triples > 5 {
+                        println!("  ... and {} more", total_triples - 5);
+                    }
+                }
+            }
+        },
+        Err(e) => {
+            eprintln!("✗ Inference with materialization failed: {}", e);
+            return Err(e);
+        }
+    }
+    
+    Ok(())
+}
+
+/// Manage materialized triples
+fn manage_materialized_triples(db_path: &str, action: &str, graph: &Option<String>) -> Result<(), EpcisKgError> {
+    let store = OxigraphStore::new(db_path)?;
+    let mut reasoner = OntologyReasoner::with_store(store);
+    
+    println!("Managing materialized triples - Action: {}", action);
+    
+    match action.to_lowercase().as_str() {
+        "show" => {
+            let materialized = reasoner.get_materialized_triples();
+            let stats = reasoner.get_detailed_stats();
+            
+            println!("\n=== Materialized Triples ===");
+            println!("Total materialized triples: {}", materialized.len());
+            println!("Materialization strategy: {:?}", stats.strategy);
+            println!("Total inferences performed: {}", stats.total_inferences);
+            println!("Last inference time: {:?}", stats.last_inference_time);
+            
+            if let Some(graph_name) = graph {
+                // Show triples for specific graph
+                println!("\nTriples in graph '{}':", graph_name);
+                if let Some(triples) = reasoner.get_materialized_triples_for_graph(graph_name) {
+                    for (i, triple) in triples.iter().enumerate() {
+                        println!("  {}. {} {} {}", i + 1, triple.subject, triple.predicate, triple.object);
+                    }
+                } else {
+                    println!("  No triples found in graph '{}'", graph_name);
+                }
+            } else {
+                // Show all materialized triples
+                let total_triples: usize = materialized.values().map(|v| v.len()).sum();
+                if total_triples > 0 {
+                    println!("\nAll materialized triples:");
+                    let mut count = 0;
+                    for (graph_name, triples) in materialized {
+                        for triple in triples {
+                            println!("  {}. {} {} {}", count + 1, triple.subject, triple.predicate, triple.object);
+                            count += 1;
+                        }
+                    }
+                } else {
+                    println!("No materialized triples found");
+                }
+                
+                // Show by graph
+                if !reasoner.get_materialized_triples().is_empty() {
+                    println!("\nBy graph:");
+                    for (graph_name, triples) in reasoner.get_materialized_triples() {
+                        println!("  '{}': {} triples", graph_name, triples.len());
+                    }
+                }
+            }
+        },
+        "clear" => {
+            let count = reasoner.get_materialized_triples().len();
+            reasoner.clear_materialized_triples();
+            println!("✓ Cleared {} materialized triples", count);
+            
+            if let Some(graph_name) = graph {
+                println!("Cleared triples for graph: '{}'", graph_name);
+            }
+        },
+        "stats" => {
+            let stats = reasoner.get_detailed_stats();
+            let materialized = reasoner.get_materialized_triples();
+            
+            println!("\n=== Materialization Statistics ===");
+            println!("Total materialized triples: {}", materialized.len());
+            println!("Materialization strategy: {:?}", stats.strategy);
+            println!("Total inferences: {}", stats.total_inferences);
+            println!("Incremental inferences: {}", stats.incremental_inferences);
+            println!("Full inferences: {}", stats.full_inferences);
+            println!("Total processing time: {}ms", stats.total_processing_time_ms);
+            println!("Average processing time: {:.2}ms", stats.average_processing_time_ms);
+            println!("Cache hits: {}", stats.cache_hits);
+            println!("Cache misses: {}", stats.cache_misses);
+            println!("Cache hit rate: {:.2}%", stats.cache_hit_rate() * 100.0);
+            println!("Last inference time: {:?}", stats.last_inference_time);
+            
+            if let Some(graph_name) = graph {
+                if let Some(triples) = reasoner.get_materialized_triples_for_graph(graph_name) {
+                    println!("\nStats for graph '{}':", graph_name);
+                    println!("  Triples: {}", triples.len());
+                }
+            }
+        },
+        _ => {
+            return Err(EpcisKgError::Config(format!("Unknown action: {}. Use 'show', 'clear', or 'stats'", action)));
+        }
+    }
+    
+    Ok(())
+}
+
+/// Perform incremental inference on new data
+fn perform_incremental_inference(db_path: &str, triples_file: &str, format: &str) -> Result<(), EpcisKgError> {
+    let store = OxigraphStore::new(db_path)?;
+    let mut reasoner = OntologyReasoner::with_store(store);
+    
+    println!("Performing incremental inference on new data from: {}", triples_file);
+    
+    // Load new triples from file
+    let new_triples = load_triples_from_file(triples_file)?;
+    println!("Loaded {} new triples from file", new_triples.len());
+    
+    // Perform incremental inference
+    println!("Performing incremental inference...");
+    let start_time = std::time::Instant::now();
+    
+    match reasoner.perform_incremental_inference(&new_triples) {
+        Ok(result) => {
+            let processing_time = start_time.elapsed();
+            
+            // Display results
+            if format == "json" {
+                let stats = reasoner.get_detailed_stats();
+                let json_output = serde_json::json!({
+                    "incremental_inference_result": result,
+                    "new_triples_count": new_triples.len(),
+                    "processing_time_ms": processing_time.as_millis() as u64,
+                    "inference_stats": stats,
+                    "total_materialized_triples": reasoner.get_materialized_triples().len()
+                });
+                println!("{}", serde_json::to_string_pretty(&json_output)?);
+            } else {
+                // Text format
+                println!("\n=== Incremental Inference Results ===");
+                println!("New triples processed: {}", result.new_triples_processed);
+                println!("Processing time: {:?}", processing_time);
+                println!("Consistent: {}", if result.consistent { "✅ Yes" } else { "❌ No" });
+                println!("Classification performed: {}", if result.classification_performed { "✅ Yes" } else { "❌ No" });
+                println!("Realization performed: {}", if result.realization_performed { "✅ Yes" } else { "❌ No" });
+                println!("Materialized triples: {}", result.materialized_triples);
+                println!("SPARQL inferences: {}", result.sparql_inferences);
+                println!("Individuals classified: {}", result.individuals_classified);
+                println!("Incremental: {}", if result.incremental { "✅ Yes" } else { "❌ No" });
+                
+                if !result.inference_errors.is_empty() {
+                    println!("\nInference Errors:");
+                    for error in &result.inference_errors {
+                        println!("  - {}", error);
+                    }
+                }
+                
+                // Show detailed statistics
+                let stats = reasoner.get_detailed_stats();
+                println!("\n=== Updated Statistics ===");
+                println!("Total inferences: {}", stats.total_inferences);
+                println!("Incremental inferences: {}", stats.incremental_inferences);
+                println!("Full inferences: {}", stats.full_inferences);
+                println!("Materialized triples count: {}", stats.materialized_triples_count);
+                println!("Total processing time: {}ms", stats.total_processing_time_ms);
+                println!("Average processing time: {:.2}ms", stats.average_processing_time_ms);
+                
+                // Show newly materialized triples
+                let materialized = reasoner.get_materialized_triples();
+                if !materialized.is_empty() {
+                    println!("\n=== Newly Materialized Triples (Sample) ===");
+                    let mut count = 0;
+                    for (graph_name, triples) in materialized {
+                        for triple in triples {
+                            if count >= 3 { break; }
+                            println!("  {}. {} {} {}", count + 1, triple.subject, triple.predicate, triple.object);
+                            count += 1;
+                        }
+                        if count >= 3 { break; }
+                    }
+                    let total_triples: usize = materialized.values().map(|v| v.len()).sum();
+                    if total_triples > 3 {
+                        println!("  ... and {} more", total_triples - 3);
+                    }
+                }
+            }
+        },
+        Err(e) => {
+            eprintln!("✗ Incremental inference failed: {}", e);
+            return Err(e);
+        }
+    }
+    
+    Ok(())
+}
+
+/// Load triples from a Turtle file
+fn load_triples_from_file(file_path: &str) -> Result<Vec<oxrdf::Triple>, EpcisKgError> {
+    let content = std::fs::read_to_string(file_path)
+        .map_err(|e| EpcisKgError::Io(e))?;
+    
+    // Simple Turtle parsing for demonstration
+    // In a real implementation, you'd use a proper Turtle parser
+    let mut triples = Vec::new();
+    
+    for line in content.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        
+        // Simple triple parsing: subject predicate object .
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() >= 3 {
+            if let (Ok(subject), Ok(predicate), Ok(object)) = (
+                oxrdf::NamedNode::new(parts[0]),
+                oxrdf::NamedNode::new(parts[1]),
+                oxrdf::NamedNode::new(parts[2]),
+            ) {
+                let triple = oxrdf::Triple::new(subject, predicate, object);
+                triples.push(triple);
+            }
+        }
+    }
+    
+    Ok(triples)
+}
+
+/// Perform performance optimization actions
+fn perform_optimization(db_path: &str, action: &str, parallel: bool, cache_limit: usize, batch_size: usize) -> Result<(), EpcisKgError> {
+    let mut reasoner = OntologyReasoner::with_store(OxigraphStore::new(db_path)?);
+    
+    match action {
+        "configure" => {
+            reasoner.configure_performance(parallel, cache_limit, batch_size);
+            println!("✓ Performance configuration updated:");
+            println!("  - Parallel processing: {}", parallel);
+            println!("  - Cache limit: {}", cache_limit);
+            println!("  - Batch size: {}", batch_size);
+        },
+        "run" => {
+            reasoner.configure_performance(parallel, cache_limit, batch_size);
+            reasoner.optimize_performance()?;
+        },
+        "report" => {
+            let report = reasoner.get_performance_report();
+            println!("{}", report);
+        },
+        "benchmark" => {
+            println!("Running performance benchmark...");
+            run_performance_benchmark(&mut reasoner)?;
+        },
+        _ => {
+            return Err(EpcisKgError::Config(format!("Unknown optimization action: {}. Use 'configure', 'run', 'report', or 'benchmark'", action)));
+        }
+    }
+    
+    Ok(())
+}
+
+/// Perform parallel inference
+fn perform_parallel_inference(db_path: &str, format: &str) -> Result<(), EpcisKgError> {
+    let mut reasoner = OntologyReasoner::with_store(OxigraphStore::new(db_path)?);
+    
+    match reasoner.perform_parallel_inference() {
+        Ok(result) => {
+            println!("\n=== Parallel Inference Results ===");
+            println!("✓ Inference completed successfully");
+            println!("  - Materialized triples: {}", result.materialized_triples);
+            println!("  - Processing time: {}ms", result.processing_time_ms);
+            println!("  - Classification performed: {}", result.classification_performed);
+            println!("  - Consistent: {}", result.consistent);
+            
+            if format == "json" {
+                let json_output = serde_json::to_string_pretty(&result)?;
+                println!("\nJSON Output:");
+                println!("{}", json_output);
+            }
+        },
+        Err(e) => {
+            eprintln!("✗ Parallel inference failed: {}", e);
+        }
+    }
+    
+    Ok(())
+}
+
+/// Run performance benchmarks
+fn run_performance_benchmark(reasoner: &mut OntologyReasoner) -> Result<(), EpcisKgError> {
+    println!("Running performance benchmarks...");
+    
+    // Test sequential vs parallel performance
+    let iterations = 10;
+    
+    // Sequential benchmark
+    let start_sequential = Instant::now();
+    for _ in 0..iterations {
+        reasoner.perform_inference_with_materialization()?;
+    }
+    let sequential_time = start_sequential.elapsed();
+    
+    // Parallel benchmark
+    reasoner.configure_performance(true, 10000, 1000);
+    let start_parallel = Instant::now();
+    for _ in 0..iterations {
+        reasoner.perform_parallel_inference()?;
+    }
+    let parallel_time = start_parallel.elapsed();
+    
+    println!("\n=== Performance Benchmark Results ===");
+    println!("Iterations: {}", iterations);
+    println!("Sequential time: {:?}", sequential_time);
+    println!("Parallel time: {:?}", parallel_time);
+    println!("Speedup: {:.2}x", sequential_time.as_secs_f64() / parallel_time.as_secs_f64());
+    
+    // Cache performance
+    let metrics = reasoner.get_performance_metrics();
+    println!("Cache hit rate: {:.1}%", metrics.cache_hit_rate() * 100.0);
+    println!("Parallel operation rate: {:.1}%", metrics.parallel_operation_rate() * 100.0);
+    
+    Ok(())
 }

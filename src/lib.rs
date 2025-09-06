@@ -44,6 +44,9 @@ pub enum EpcisKgError {
     
     #[error("IRI parsing error: {0}")]
     IriParse(#[from] oxrdf::IriParseError),
+    
+    #[error("Blank node ID parsing error: {0}")]
+    BlankNodeIdParse(#[from] oxrdf::BlankNodeIdParseError),
 }
 
 // Re-export the new AppConfig for backwards compatibility
