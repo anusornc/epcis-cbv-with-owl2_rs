@@ -1,0 +1,77 @@
+@prefix epcis: <urn:epcglobal:epcis:> .
+@prefix cbv: <urn:epcglobal:cbv:> .
+@prefix example: <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Product definitions
+example:Product a rdfs:Class ;
+    rdfs:label "Product" ;
+    rdfs:comment "A product in the supply chain" .
+
+example:ElectronicProduct a rdfs:Class ;
+    rdfs:subClassOf example:Product ;
+    rdfs:label "Electronic Product" .
+
+example:FoodProduct a rdfs:Class ;
+    rdfs:subClassOf example:Product ;
+    rdfs:label "Food Product" .
+
+# Location definitions
+example:Location a rdfs:Class ;
+    rdfs:label "Location" ;
+    rdfs:comment "A location in the supply chain" .
+
+example:Warehouse a rdfs:Class ;
+    rdfs:subClassOf example:Location ;
+    rdfs:label "Warehouse" .
+
+example:Store a rdfs:Class ;
+    rdfs:subClassOf example:Location ;
+    rdfs:label "Store" .
+
+example:Factory a rdfs:Class ;
+    rdfs:subClassOf example:Location ;
+    rdfs:label "Factory" .
+
+# Properties
+example:hasLocation a rdf:Property ;
+    rdfs:domain example:Product ;
+    rdfs:range example:Location ;
+    rdfs:label "has location" .
+
+example:locatedAt a rdf:Property ;
+    rdfs:subPropertyOf example:hasLocation ;
+    rdfs:label "located at" .
+
+example:hasSKU a rdf:Property ;
+    rdfs:domain example:Product ;
+    rdfs:range xsd:string ;
+    rdfs:label "has SKU" .
+
+example:hasExpirationDate a rdf:Property ;
+    rdfs:domain example:Product ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "has expiration date" .
+
+example:hasBatchNumber a rdf:Property ;
+    rdfs:domain example:Product ;
+    rdfs:range xsd:string ;
+    rdfs:label "has batch number" .
+
+# Sample instances
+example:product123 a example:ElectronicProduct ;
+    example:hasSKU "ELEC-001" ;
+    example:hasExpirationDate "2024-12-31T23:59:59Z"^^xsd:dateTime ;
+    example:hasBatchNumber "BATCH-001" .
+
+example:warehouse1 a example:Warehouse ;
+    rdfs:label "Main Warehouse" .
+
+example:store1 a example:Store ;
+    rdfs:label "Downtown Store" .
+
+example:factory1 a example:Factory ;
+    rdfs:label "Electronics Factory" .
+
+# Relationships
+example:product123 example:locatedAt example:warehouse1 .

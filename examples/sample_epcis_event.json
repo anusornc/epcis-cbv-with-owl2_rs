@@ -1,0 +1,23 @@
+{
+  "eventTime": "2024-01-01T10:00:00Z",
+  "eventTimeZoneOffset": "+00:00",
+  "epcList": [
+    "urn:epc:id:sgtin:0614141.107346.2017",
+    "urn:epc:id:sgtin:0614141.107346.2018"
+  ],
+  "action": "OBSERVE",
+  "bizStep": "urn:epcglobal:cbv:bizstep:receiving",
+  "disposition": "urn:epcglobal:cbv:disp:in_progress",
+  "readPoint": {
+    "id": "urn:epc:id:sgln:0614141.12345.0"
+  },
+  "bizLocation": {
+    "id": "urn:epc:id:sgln:0614141.12345.1"
+  },
+  "bizTransactionList": [
+    {
+      "type": "urn:epcglobal:cbv:btt:po",
+      "id": "urn:epcglobal:cbv:bt:PO123456"
+    }
+  ]
+}
