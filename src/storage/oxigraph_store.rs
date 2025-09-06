@@ -57,7 +57,7 @@ impl OxigraphStore {
     }
     
     /// Store ontology data from Turtle format string
-    pub fn store_ontology_turtle(&mut self, turtle_data: &str, graph_name: &str) -> Result<(), EpcisKgError> {
+    pub fn store_ontology_turtle(&mut self, _turtle_data: &str, graph_name: &str) -> Result<(), EpcisKgError> {
         // For now, we'll skip Turtle parsing and just store empty graphs
         // In a real implementation, you'd use a proper Turtle parser
         let graph = OxrdfGraph::default();
@@ -296,8 +296,8 @@ impl OxigraphStore {
     }
     
     /// Parse Turtle content to Graph
-    fn parse_turtle_to_graph(turtle_content: &str) -> Result<OxrdfGraph, EpcisKgError> {
-        let mut graph = OxrdfGraph::default();
+    fn parse_turtle_to_graph(_turtle_content: &str) -> Result<OxrdfGraph, EpcisKgError> {
+        let graph = OxrdfGraph::default();
         
         // For now, return empty graph since parsing complex Turtle syntax is non-trivial
         // In production, you'd use a proper Turtle parser like oxttl

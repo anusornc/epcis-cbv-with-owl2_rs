@@ -1,119 +1,119 @@
-<urn:epcglobal:cbv:SHIPPING> <http://www.w3.org/2000/01/rdf-schema#label> "Shipping" .
-<urn:epcglobal:cbv:SHIPPING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for shipping objects" .
-<urn:epcglobal:cbv:SHIPPING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<http://example.com/DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#label> "Distribution Center" .
-<http://example.com/DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/Location> .
-<http://example.com/DistributionCenter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:epcis:DELETE> <http://www.w3.org/2000/01/rdf-schema#label> "Delete" .
-<urn:epcglobal:epcis:DELETE> <http://www.w3.org/2000/01/rdf-schema#comment> "Action to delete an object" .
-<urn:epcglobal:epcis:DELETE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:epcis:Event> <http://www.w3.org/2000/01/rdf-schema#label> "Event" .
-<urn:epcglobal:epcis:Event> <http://www.w3.org/2000/01/rdf-schema#comment> "Base class for all EPCIS events" .
-<urn:epcglobal:epcis:Event> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:epcis:ADD> <http://www.w3.org/2000/01/rdf-schema#label> "Add" .
-<urn:epcglobal:epcis:ADD> <http://www.w3.org/2000/01/rdf-schema#comment> "Action to add an object" .
-<urn:epcglobal:epcis:ADD> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Object Event" .
-<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the association of objects with a business step" .
-<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:cbv:INSPECTING> <http://www.w3.org/2000/01/rdf-schema#label> "Inspecting" .
-<urn:epcglobal:cbv:INSPECTING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for inspecting objects" .
-<urn:epcglobal:cbv:INSPECTING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:cbv:ENCODING> <http://www.w3.org/2000/01/rdf-schema#label> "Encoding" .
-<urn:epcglobal:cbv:ENCODING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for encoding objects" .
-<urn:epcglobal:cbv:ENCODING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#label> "Record Time" .
-<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#comment> "Time when the event was recorded" .
-<urn:epcglobal:epcis:recordTime> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
-<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#label> "Business Location" .
-<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#comment> "Location where the event occurred" .
-<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
-<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#range> <http://example.com/Location> .
-<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
-<http://example.com/Warehouse> <http://www.w3.org/2000/01/rdf-schema#label> "Warehouse" .
-<http://example.com/Warehouse> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/Location> .
-<http://example.com/Warehouse> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:cbv:PACKING> <http://www.w3.org/2000/01/rdf-schema#label> "Packing" .
-<urn:epcglobal:cbv:PACKING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for packing objects" .
-<urn:epcglobal:cbv:PACKING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:cbv:DAMAGED> <http://www.w3.org/2000/01/rdf-schema#label> "Damaged" .
-<urn:epcglobal:cbv:DAMAGED> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating damaged status" .
-<urn:epcglobal:cbv:DAMAGED> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:cbv:EXPIRED> <http://www.w3.org/2000/01/rdf-schema#label> "Expired" .
-<urn:epcglobal:cbv:EXPIRED> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating expired status" .
-<urn:epcglobal:cbv:EXPIRED> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Aggregation Event" .
-<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the physical aggregation of objects" .
-<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#label> "Event Time" .
-<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#comment> "Time when the event occurred" .
-<urn:epcglobal:epcis:eventTime> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
-<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#label> "Event Type" .
-<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#comment> "Type of the event" .
-<urn:epcglobal:epcis:eventType> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
-<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Transformation Event" .
-<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the transformation of objects" .
-<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:epcis:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#label> "Observe" .
-<urn:epcglobal:epcis:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Action to observe an object" .
-<urn:epcglobal:epcis:OBSERVE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<http://example.com/RetailStore> <http://www.w3.org/2000/01/rdf-schema#label> "Retail Store" .
-<http://example.com/RetailStore> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/Location> .
-<http://example.com/RetailStore> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:cbv:INACTIVE> <http://www.w3.org/2000/01/rdf-schema#label> "Inactive" .
-<urn:epcglobal:cbv:INACTIVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating inactive status" .
-<urn:epcglobal:cbv:INACTIVE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<urn:epcglobal:cbv:COMMISSIONING> <http://www.w3.org/2000/01/rdf-schema#label> "Commissioning" .
-<urn:epcglobal:cbv:COMMISSIONING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for commissioning objects" .
-<urn:epcglobal:cbv:COMMISSIONING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
-<http://example.com/Location> <http://www.w3.org/2000/01/rdf-schema#label> "Location" .
-<http://example.com/Location> <http://www.w3.org/2000/01/rdf-schema#comment> "A location in the supply chain" .
-<http://example.com/Location> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:action> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:ObjectEvent> .
 <urn:epcglobal:epcis:action> <http://www.w3.org/2000/01/rdf-schema#label> "Action" .
-<urn:epcglobal:epcis:action> <http://www.w3.org/2000/01/rdf-schema#comment> "Action performed on the object" .
 <urn:epcglobal:epcis:action> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
 <urn:epcglobal:epcis:action> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
-<urn:epcglobal:epcis:action> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:ObjectEvent> .
-<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#label> "Disposition" .
-<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition of the objects" .
-<urn:epcglobal:epcis:disposition> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
-<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#label> "EPC List" .
-<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#comment> "List of EPCs involved in the event" .
-<urn:epcglobal:epcis:epcList> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
-<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
-<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:ObjectEvent> .
-<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Transaction Event" .
-<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records a business transaction" .
-<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Quantity Event" .
-<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the quantity of objects" .
-<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:action> <http://www.w3.org/2000/01/rdf-schema#comment> "Action performed on the object" .
+<http://example.com/Location> <http://www.w3.org/2000/01/rdf-schema#label> "Location" .
+<http://example.com/Location> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://example.com/Location> <http://www.w3.org/2000/01/rdf-schema#comment> "A location in the supply chain" .
+<urn:epcglobal:epcis:DELETE> <http://www.w3.org/2000/01/rdf-schema#label> "Delete" .
+<urn:epcglobal:epcis:DELETE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:epcis:DELETE> <http://www.w3.org/2000/01/rdf-schema#comment> "Action to delete an object" .
+<urn:epcglobal:epcis:bizStep> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
 <urn:epcglobal:epcis:bizStep> <http://www.w3.org/2000/01/rdf-schema#label> "Business Step" .
-<urn:epcglobal:epcis:bizStep> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step in which the event occurred" .
 <urn:epcglobal:epcis:bizStep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
 <urn:epcglobal:epcis:bizStep> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
-<urn:epcglobal:epcis:bizStep> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
-<urn:epcglobal:cbv:RECEIVING> <http://www.w3.org/2000/01/rdf-schema#label> "Receiving" .
-<urn:epcglobal:cbv:RECEIVING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for receiving objects" .
-<urn:epcglobal:cbv:RECEIVING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:epcis:bizStep> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step in which the event occurred" .
+<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#label> "Event Type" .
+<urn:epcglobal:epcis:eventType> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<urn:epcglobal:epcis:eventType> <http://www.w3.org/2000/01/rdf-schema#comment> "Type of the event" .
+<urn:epcglobal:cbv:ENCODING> <http://www.w3.org/2000/01/rdf-schema#label> "Encoding" .
+<urn:epcglobal:cbv:ENCODING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:ENCODING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for encoding objects" .
+<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#label> "Disposition" .
+<urn:epcglobal:epcis:disposition> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<urn:epcglobal:epcis:disposition> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition of the objects" .
+<urn:epcglobal:epcis:Event> <http://www.w3.org/2000/01/rdf-schema#label> "Event" .
+<urn:epcglobal:epcis:Event> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:Event> <http://www.w3.org/2000/01/rdf-schema#comment> "Base class for all EPCIS events" .
+<urn:epcglobal:cbv:INACTIVE> <http://www.w3.org/2000/01/rdf-schema#label> "Inactive" .
+<urn:epcglobal:cbv:INACTIVE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:INACTIVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating inactive status" .
 <urn:epcglobal:cbv:ACTIVE> <http://www.w3.org/2000/01/rdf-schema#label> "Active" .
-<urn:epcglobal:cbv:ACTIVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating active status" .
 <urn:epcglobal:cbv:ACTIVE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:ACTIVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating active status" .
+<urn:epcglobal:cbv:PACKING> <http://www.w3.org/2000/01/rdf-schema#label> "Packing" .
+<urn:epcglobal:cbv:PACKING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:PACKING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for packing objects" .
+<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#label> "Business Location" .
+<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#range> <http://example.com/Location> .
+<urn:epcglobal:epcis:bizLocation> <http://www.w3.org/2000/01/rdf-schema#comment> "Location where the event occurred" .
+<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Transaction Event" .
+<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records a business transaction" .
+<urn:epcglobal:epcis:TransactionEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
+<http://example.com/DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#label> "Distribution Center" .
+<http://example.com/DistributionCenter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://example.com/DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/Location> .
+<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Aggregation Event" .
+<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the physical aggregation of objects" .
+<urn:epcglobal:epcis:AggregationEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
+<http://example.com/Warehouse> <http://www.w3.org/2000/01/rdf-schema#label> "Warehouse" .
+<http://example.com/Warehouse> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://example.com/Warehouse> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/Location> .
+<urn:epcglobal:epcis:ADD> <http://www.w3.org/2000/01/rdf-schema#label> "Add" .
+<urn:epcglobal:epcis:ADD> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:epcis:ADD> <http://www.w3.org/2000/01/rdf-schema#comment> "Action to add an object" .
+<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#label> "Event Time" .
+<urn:epcglobal:epcis:eventTime> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+<urn:epcglobal:epcis:eventTime> <http://www.w3.org/2000/01/rdf-schema#comment> "Time when the event occurred" .
+<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:ObjectEvent> .
+<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#label> "EPC List" .
+<urn:epcglobal:epcis:epcList> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty> .
+<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+<urn:epcglobal:epcis:epcList> <http://www.w3.org/2000/01/rdf-schema#comment> "List of EPCs involved in the event" .
+<urn:epcglobal:cbv:SHIPPING> <http://www.w3.org/2000/01/rdf-schema#label> "Shipping" .
+<urn:epcglobal:cbv:SHIPPING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:SHIPPING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for shipping objects" .
+<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Transformation Event" .
+<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the transformation of objects" .
+<urn:epcglobal:epcis:TransformationEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:cbv:RECEIVING> <http://www.w3.org/2000/01/rdf-schema#label> "Receiving" .
+<urn:epcglobal:cbv:RECEIVING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:RECEIVING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for receiving objects" .
+<urn:epcglobal:cbv:EXPIRED> <http://www.w3.org/2000/01/rdf-schema#label> "Expired" .
+<urn:epcglobal:cbv:EXPIRED> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:EXPIRED> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating expired status" .
+<urn:epcglobal:cbv:INSPECTING> <http://www.w3.org/2000/01/rdf-schema#label> "Inspecting" .
+<urn:epcglobal:cbv:INSPECTING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:INSPECTING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for inspecting objects" .
+<urn:epcglobal:epcis:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#label> "Observe" .
+<urn:epcglobal:epcis:OBSERVE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:epcis:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Action to observe an object" .
+<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#label> "Record Time" .
+<urn:epcglobal:epcis:recordTime> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
+<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#dateTime> .
+<urn:epcglobal:epcis:recordTime> <http://www.w3.org/2000/01/rdf-schema#comment> "Time when the event was recorded" .
+<http://example.com/RetailStore> <http://www.w3.org/2000/01/rdf-schema#label> "Retail Store" .
+<http://example.com/RetailStore> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<http://example.com/RetailStore> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/Location> .
+<urn:epcglobal:cbv:DAMAGED> <http://www.w3.org/2000/01/rdf-schema#label> "Damaged" .
+<urn:epcglobal:cbv:DAMAGED> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:DAMAGED> <http://www.w3.org/2000/01/rdf-schema#comment> "Disposition indicating damaged status" .
+<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Quantity Event" .
+<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the quantity of objects" .
+<urn:epcglobal:epcis:QuantityEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:cbv:COMMISSIONING> <http://www.w3.org/2000/01/rdf-schema#label> "Commissioning" .
+<urn:epcglobal:cbv:COMMISSIONING> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#NamedIndividual> .
+<urn:epcglobal:cbv:COMMISSIONING> <http://www.w3.org/2000/01/rdf-schema#comment> "Business step for commissioning objects" .
+<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/2000/01/rdf-schema#label> "Object Event" .
+<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/2000/01/rdf-schema#comment> "An event that records the association of objects with a business step" .
+<urn:epcglobal:epcis:ObjectEvent> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:epcis:eventID> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
 <urn:epcglobal:epcis:eventID> <http://www.w3.org/2000/01/rdf-schema#label> "Event ID" .
-<urn:epcglobal:epcis:eventID> <http://www.w3.org/2000/01/rdf-schema#comment> "Unique identifier for the event" .
 <urn:epcglobal:epcis:eventID> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
 <urn:epcglobal:epcis:eventID> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
-<urn:epcglobal:epcis:eventID> <http://www.w3.org/2000/01/rdf-schema#domain> <urn:epcglobal:epcis:Event> .
+<urn:epcglobal:epcis:eventID> <http://www.w3.org/2000/01/rdf-schema#comment> "Unique identifier for the event" .

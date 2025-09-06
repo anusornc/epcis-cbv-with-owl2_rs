@@ -65,7 +65,7 @@ impl SparqlEndpoint {
             return Err(EpcisKgError::Query("Unsupported SPARQL query type".to_string()));
         };
         
-        let execution_time = start_time.elapsed().as_millis() as u64;
+        let _execution_time = start_time.elapsed().as_millis() as u64;
         
         Ok(result)
     }

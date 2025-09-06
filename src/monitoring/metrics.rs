@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicU64, AtomicU32, Ordering};
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 use serde::{Serialize, Deserialize};
 use parking_lot::Mutex;
 

@@ -1,4 +1,5 @@
 pub mod api;
+pub mod benchmarks;
 pub mod config;
 pub mod models;
 pub mod monitoring;
@@ -6,6 +7,7 @@ pub mod ontology;
 pub mod pipeline;
 pub mod storage;
 pub mod utils;
+pub mod data_gen;
 
 use thiserror::Error;
 
@@ -48,6 +50,9 @@ pub enum EpcisKgError {
     
     #[error("Blank node ID parsing error: {0}")]
     BlankNodeIdParse(#[from] oxrdf::BlankNodeIdParseError),
+    
+    #[error("Generic error: {0}")]
+    Generic(#[from] Box<dyn std::error::Error + Send + Sync>),
 }
 
 // Re-export the new AppConfig for backwards compatibility

@@ -3,17 +3,16 @@ use crate::storage::oxigraph_store::OxigraphStore;
 use crate::ontology::reasoner::OntologyReasoner;
 use crate::pipeline::EpcisEventPipeline;
 use crate::models::events::ProcessingResult;
-use crate::monitoring::metrics::{SystemMonitor, SystemMetrics, AlertConfig, AlertSeverity, AlertType};
-use crate::monitoring::logging::{RequestLogger, LoggingConfig, LogFormat};
+use crate::monitoring::metrics::{SystemMonitor, AlertSeverity, AlertConfig};
+use crate::monitoring::logging::LoggingConfig;
 use crate::EpcisKgError;
 use axum::{
-    extract::{Query, State},
+    extract::Query,
     response::{Json, Response, IntoResponse},
     routing::{get, post},
     Router,
 };
 use std::sync::{Arc, Mutex, RwLock};
-use std::time::Instant;
 use tower_http::cors::{CorsLayer, Any};
 use tower_http::trace::TraceLayer;
 use tracing::info;

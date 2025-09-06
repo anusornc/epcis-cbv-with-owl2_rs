@@ -8,7 +8,7 @@ use oxrdf::Graph;
 
 #[test]
 fn test_ontology_loader_creation() {
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     // Test that loader can be created
     assert!(true); // If we get here, creation succeeded
 }
@@ -29,7 +29,7 @@ fn test_ontology_loader_load_single_file() {
         test_data::sample_turtle_ontology()
     );
 
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     let result = loader.load_ontology(&ontology_file);
     
     // Since we have a placeholder implementation, expect it to return not implemented
@@ -59,7 +59,7 @@ fn test_ontology_loader_load_multiple_files() {
         "#
     );
 
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     let files = vec![file1, file2];
     let result = loader.load_ontologies(&files);
     
@@ -72,7 +72,7 @@ fn test_ontology_loader_invalid_file() {
     let temp_dir = temp_dir::create_temp_dir();
     let invalid_file = temp_dir.path().join("nonexistent.ttl");
 
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     let result = loader.load_ontology(&invalid_file);
     
     // Should return error for non-existent file
@@ -88,7 +88,7 @@ fn test_ontology_loader_empty_file() {
         ""
     );
 
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     let result = loader.load_ontology(&empty_file);
     
     // Expect not implemented for placeholder
@@ -104,7 +104,7 @@ fn test_ontology_loader_malformed_turtle() {
         "This is not valid Turtle syntax @prefix"
     );
 
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     let result = loader.load_ontology(&malformed_file);
     
     // Expect not implemented for placeholder
@@ -113,7 +113,7 @@ fn test_ontology_loader_malformed_turtle() {
 
 #[test]
 fn test_ontology_reasoner_creation() {
-    let _reasoner = OntologyReasoner::new();
+    let reasoner = OntologyReasoner::new();
     // Test that reasoner can be created
     assert!(true); // If we get here, creation succeeded
 }
@@ -215,8 +215,8 @@ fn test_ontology_integration() {
         test_data::sample_turtle_ontology()
     );
 
-    let _loader = OntologyLoader::new();
-    let _reasoner = OntologyReasoner::new();
+    let loader = OntologyLoader::new();
+    let mut reasoner = OntologyReasoner::new();
     
     // Load ontology (expect not implemented)
     let load_result = loader.load_ontology(&ontology_file);
@@ -244,7 +244,7 @@ fn test_ontology_performance_large_file() {
         &large_ontology
     );
 
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     let start = std::time::Instant::now();
     
     let result = loader.load_ontology(&large_file);
@@ -294,7 +294,7 @@ fn test_ontology_format_support() {
         </rdf:RDF>"#),
     ];
     
-    let _loader = OntologyLoader::new();
+    let loader = OntologyLoader::new();
     
     for (format, content) in formats {
         let file = temp_dir::create_temp_file_with_content(

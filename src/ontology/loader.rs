@@ -116,8 +116,8 @@ impl OntologyLoader {
         let mut properties = Vec::new();
         
         let rdf_type = NamedNodeRef::new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").unwrap();
-        let rdfs_class = NamedNodeRef::new("http://www.w3.org/2000/01/rdf-schema#Class").unwrap();
-        let owl_class = NamedNodeRef::new("http://www.w3.org/2002/07/owl#Class").unwrap();
+        let _rdfs_class = NamedNodeRef::new("http://www.w3.org/2000/01/rdf-schema#Class").unwrap();
+        let _owl_class = NamedNodeRef::new("http://www.w3.org/2002/07/owl#Class").unwrap();
         let epcis_event = NamedNodeRef::new("urn:epcglobal:epcis:Event").unwrap();
         let epcis_object_event = NamedNodeRef::new("urn:epcglobal:epcis:ObjectEvent").unwrap();
         let epcis_aggregation_event = NamedNodeRef::new("urn:epcglobal:epcis:AggregationEvent").unwrap();
@@ -200,8 +200,8 @@ impl OntologyLoader {
         let mut actions = Vec::new();
         
         let rdf_type = NamedNodeRef::new("http://www.w3.org/1999/02/22-rdf-syntax-ns#type").unwrap();
-        let rdfs_class = NamedNodeRef::new("http://www.w3.org/2000/01/rdf-schema#Class").unwrap();
-        let owl_class = NamedNodeRef::new("http://www.w3.org/2002/07/owl#Class").unwrap();
+        let _rdfs_class = NamedNodeRef::new("http://www.w3.org/2000/01/rdf-schema#Class").unwrap();
+        let _owl_class = NamedNodeRef::new("http://www.w3.org/2002/07/owl#Class").unwrap();
         let cbv_biz_step = NamedNodeRef::new("urn:epcglobal:cbv:BizStep").unwrap();
         let cbv_disposition = NamedNodeRef::new("urn:epcglobal:cbv:Disposition").unwrap();
         let cbv_business_location = NamedNodeRef::new("urn:epcglobal:cbv:BusinessLocation").unwrap();

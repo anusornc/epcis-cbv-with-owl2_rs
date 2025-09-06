@@ -54,7 +54,7 @@ impl EventProcessor {
     /// Validate an EPCIS event
     pub fn validate_event(&self, event: &EpcisEvent) -> Result<ValidationResult, EpcisKgError> {
         let mut errors = Vec::new();
-        let mut warnings = Vec::new();
+        let warnings = Vec::new();
         
         // Basic validation
         if event.event_id.is_empty() {

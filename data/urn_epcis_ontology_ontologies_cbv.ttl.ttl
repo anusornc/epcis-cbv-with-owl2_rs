@@ -1,144 +1,144 @@
-<urn:epcglobal:cbv:in_transit> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:in_transit> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is currently being transported" .
-<urn:epcglobal:cbv:in_transit> <http://www.w3.org/2000/01/rdf-schema#label> "In Transit" .
-<urn:epcglobal:cbv:selling> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:selling> <http://www.w3.org/2000/01/rdf-schema#comment> "Selling products to customers" .
-<urn:epcglobal:cbv:selling> <http://www.w3.org/2000/01/rdf-schema#label> "Selling" .
-<urn:epcglobal:cbv:Disposition> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
-<urn:epcglobal:cbv:Disposition> <http://www.w3.org/2000/01/rdf-schema#comment> "The state or condition of an item" .
-<urn:epcglobal:cbv:Disposition> <http://www.w3.org/2000/01/rdf-schema#label> "Disposition" .
-<urn:epcglobal:cbv:BizStep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
-<urn:epcglobal:cbv:BizStep> <http://www.w3.org/2000/01/rdf-schema#comment> "A business step in the supply chain process" .
-<urn:epcglobal:cbv:BizStep> <http://www.w3.org/2000/01/rdf-schema#label> "Business Step" .
-<urn:epcglobal:cbv:Factory> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:Factory> <http://www.w3.org/2000/01/rdf-schema#comment> "A manufacturing facility" .
-<urn:epcglobal:cbv:Factory> <http://www.w3.org/2000/01/rdf-schema#label> "Factory" .
-<urn:epcglobal:cbv:assembling> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:assembling> <http://www.w3.org/2000/01/rdf-schema#comment> "Putting components together to create a product" .
-<urn:epcglobal:cbv:assembling> <http://www.w3.org/2000/01/rdf-schema#label> "Assembling" .
-<urn:epcglobal:cbv:quarantined> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:quarantined> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is quarantined" .
-<urn:epcglobal:cbv:quarantined> <http://www.w3.org/2000/01/rdf-schema#label> "Quarantined" .
-<urn:epcglobal:cbv:DistributionCenter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#comment> "A facility for distributing goods" .
-<urn:epcglobal:cbv:DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#label> "Distribution Center" .
-<urn:epcglobal:cbv:RetailStore> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:RetailStore> <http://www.w3.org/2000/01/rdf-schema#comment> "A retail establishment" .
-<urn:epcglobal:cbv:RetailStore> <http://www.w3.org/2000/01/rdf-schema#label> "Retail Store" .
-<urn:epcglobal:cbv:BusinessLocation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
-<urn:epcglobal:cbv:BusinessLocation> <http://www.w3.org/2000/01/rdf-schema#comment> "A location where business activities occur" .
-<urn:epcglobal:cbv:BusinessLocation> <http://www.w3.org/2000/01/rdf-schema#label> "Business Location" .
-<urn:epcglobal:cbv:HumidityReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
-<urn:epcglobal:cbv:HumidityReading> <http://www.w3.org/2000/01/rdf-schema#comment> "Humidity sensor reading" .
-<urn:epcglobal:cbv:HumidityReading> <http://www.w3.org/2000/01/rdf-schema#label> "Humidity Reading" .
 <urn:epcglobal:cbv:Warehouse> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:Warehouse> <http://www.w3.org/2000/01/rdf-schema#comment> "A storage facility" .
 <urn:epcglobal:cbv:Warehouse> <http://www.w3.org/2000/01/rdf-schema#label> "Warehouse" .
-<urn:epcglobal:cbv:DELETE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:epcis:action> .
-<urn:epcglobal:cbv:DELETE> <http://www.w3.org/2000/01/rdf-schema#comment> "Delete an object from the system" .
-<urn:epcglobal:cbv:DELETE> <http://www.w3.org/2000/01/rdf-schema#label> "Delete" .
-<urn:epcglobal:cbv:ProductionLine> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:ProductionLine> <http://www.w3.org/2000/01/rdf-schema#comment> "A manufacturing production line" .
-<urn:epcglobal:cbv:ProductionLine> <http://www.w3.org/2000/01/rdf-schema#label> "Production Line" .
-<urn:epcglobal:cbv:SensorReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
-<urn:epcglobal:cbv:SensorReading> <http://www.w3.org/2000/01/rdf-schema#comment> "A sensor reading associated with an event" .
-<urn:epcglobal:cbv:SensorReading> <http://www.w3.org/2000/01/rdf-schema#label> "Sensor Reading" .
-<urn:epcglobal:cbv:inspected> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:inspected> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been inspected" .
-<urn:epcglobal:cbv:inspected> <http://www.w3.org/2000/01/rdf-schema#label> "Inspected" .
-<urn:epcglobal:cbv:storing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:storing> <http://www.w3.org/2000/01/rdf-schema#comment> "Storing goods in a warehouse" .
-<urn:epcglobal:cbv:storing> <http://www.w3.org/2000/01/rdf-schema#label> "Storing" .
-<urn:epcglobal:cbv:consigned> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:consigned> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is consigned to another party" .
-<urn:epcglobal:cbv:consigned> <http://www.w3.org/2000/01/rdf-schema#label> "Consigned" .
-<urn:epcglobal:cbv:manufacturing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:manufacturing> <http://www.w3.org/2000/01/rdf-schema#comment> "Creating or producing a product" .
-<urn:epcglobal:cbv:manufacturing> <http://www.w3.org/2000/01/rdf-schema#label> "Manufacturing" .
-<urn:epcglobal:cbv:ShipmentNotice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
-<urn:epcglobal:cbv:ShipmentNotice> <http://www.w3.org/2000/01/rdf-schema#comment> "A shipment notice transaction" .
-<urn:epcglobal:cbv:ShipmentNotice> <http://www.w3.org/2000/01/rdf-schema#label> "Shipment Notice" .
-<urn:epcglobal:cbv:customer_pickup> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:customer_pickup> <http://www.w3.org/2000/01/rdf-schema#comment> "Customer pickup of ordered products" .
-<urn:epcglobal:cbv:customer_pickup> <http://www.w3.org/2000/01/rdf-schema#label> "Customer Pickup" .
-<urn:epcglobal:cbv:certified> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:certified> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been certified" .
-<urn:epcglobal:cbv:certified> <http://www.w3.org/2000/01/rdf-schema#label> "Certified" .
-<urn:epcglobal:cbv:BusinessTransaction> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
-<urn:epcglobal:cbv:BusinessTransaction> <http://www.w3.org/2000/01/rdf-schema#comment> "A business transaction between parties" .
-<urn:epcglobal:cbv:BusinessTransaction> <http://www.w3.org/2000/01/rdf-schema#label> "Business Transaction" .
-<urn:epcglobal:cbv:testing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:testing> <http://www.w3.org/2000/01/rdf-schema#comment> "Testing products for quality assurance" .
-<urn:epcglobal:cbv:testing> <http://www.w3.org/2000/01/rdf-schema#label> "Testing" .
-<urn:epcglobal:cbv:owned> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:owned> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is owned by the organization" .
-<urn:epcglobal:cbv:owned> <http://www.w3.org/2000/01/rdf-schema#label> "Owned" .
-<urn:epcglobal:cbv:recalled> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:recalled> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been recalled" .
-<urn:epcglobal:cbv:recalled> <http://www.w3.org/2000/01/rdf-schema#label> "Recalled" .
-<urn:epcglobal:cbv:production> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:production> <http://www.w3.org/2000/01/rdf-schema#comment> "The process of making goods" .
-<urn:epcglobal:cbv:production> <http://www.w3.org/2000/01/rdf-schema#label> "Production" .
-<urn:epcglobal:cbv:PurchaseOrder> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
-<urn:epcglobal:cbv:PurchaseOrder> <http://www.w3.org/2000/01/rdf-schema#comment> "A purchase order transaction" .
-<urn:epcglobal:cbv:PurchaseOrder> <http://www.w3.org/2000/01/rdf-schema#label> "Purchase Order" .
-<urn:epcglobal:cbv:destroyed> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:destroyed> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been destroyed" .
-<urn:epcglobal:cbv:destroyed> <http://www.w3.org/2000/01/rdf-schema#label> "Destroyed" .
-<urn:epcglobal:cbv:ReceivingArea> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:ReceivingArea> <http://www.w3.org/2000/01/rdf-schema#comment> "Area designated for receiving goods" .
-<urn:epcglobal:cbv:ReceivingArea> <http://www.w3.org/2000/01/rdf-schema#label> "Receiving Area" .
-<urn:epcglobal:cbv:Store> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:Store> <http://www.w3.org/2000/01/rdf-schema#comment> "A store location" .
-<urn:epcglobal:cbv:Store> <http://www.w3.org/2000/01/rdf-schema#label> "Store" .
-<urn:epcglobal:cbv:ShockReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
-<urn:epcglobal:cbv:ShockReading> <http://www.w3.org/2000/01/rdf-schema#comment> "Shock or vibration sensor reading" .
-<urn:epcglobal:cbv:ShockReading> <http://www.w3.org/2000/01/rdf-schema#label> "Shock Reading" .
-<urn:epcglobal:cbv:OBSERVE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:epcis:action> .
-<urn:epcglobal:cbv:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Observe an object in the system" .
-<urn:epcglobal:cbv:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#label> "Observe" .
-<urn:epcglobal:cbv:Invoice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
-<urn:epcglobal:cbv:Invoice> <http://www.w3.org/2000/01/rdf-schema#comment> "An invoice transaction" .
-<urn:epcglobal:cbv:Invoice> <http://www.w3.org/2000/01/rdf-schema#label> "Invoice" .
-<urn:epcglobal:cbv:pricing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:pricing> <http://www.w3.org/2000/01/rdf-schema#comment> "Setting prices for products" .
-<urn:epcglobal:cbv:pricing> <http://www.w3.org/2000/01/rdf-schema#label> "Pricing" .
-<urn:epcglobal:cbv:inventory_check> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:inventory_check> <http://www.w3.org/2000/01/rdf-schema#comment> "Checking inventory levels" .
-<urn:epcglobal:cbv:inventory_check> <http://www.w3.org/2000/01/rdf-schema#label> "Inventory Check" .
-<urn:epcglobal:cbv:displaying> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:displaying> <http://www.w3.org/2000/01/rdf-schema#comment> "Displaying products for sale" .
-<urn:epcglobal:cbv:displaying> <http://www.w3.org/2000/01/rdf-schema#label> "Displaying" .
-<urn:epcglobal:cbv:reserved> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
-<urn:epcglobal:cbv:reserved> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is reserved for a specific purpose" .
-<urn:epcglobal:cbv:reserved> <http://www.w3.org/2000/01/rdf-schema#label> "Reserved" .
-<urn:epcglobal:cbv:Receipt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
-<urn:epcglobal:cbv:Receipt> <http://www.w3.org/2000/01/rdf-schema#comment> "A receipt transaction" .
-<urn:epcglobal:cbv:Receipt> <http://www.w3.org/2000/01/rdf-schema#label> "Receipt" .
-<urn:epcglobal:cbv:ShippingArea> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
-<urn:epcglobal:cbv:ShippingArea> <http://www.w3.org/2000/01/rdf-schema#comment> "Area designated for shipping activities" .
-<urn:epcglobal:cbv:ShippingArea> <http://www.w3.org/2000/01/rdf-schema#label> "Shipping Area" .
-<urn:epcglobal:cbv:LocationReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
-<urn:epcglobal:cbv:LocationReading> <http://www.w3.org/2000/01/rdf-schema#comment> "GPS or location sensor reading" .
-<urn:epcglobal:cbv:LocationReading> <http://www.w3.org/2000/01/rdf-schema#label> "Location Reading" .
+<urn:epcglobal:cbv:Warehouse> <http://www.w3.org/2000/01/rdf-schema#comment> "A storage facility" .
 <urn:epcglobal:cbv:loading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:loading> <http://www.w3.org/2000/01/rdf-schema#comment> "Loading goods onto a vehicle" .
 <urn:epcglobal:cbv:loading> <http://www.w3.org/2000/01/rdf-schema#label> "Loading" .
-<urn:epcglobal:cbv:SalesOrder> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
-<urn:epcglobal:cbv:SalesOrder> <http://www.w3.org/2000/01/rdf-schema#comment> "A sales order transaction" .
-<urn:epcglobal:cbv:SalesOrder> <http://www.w3.org/2000/01/rdf-schema#label> "Sales Order" .
-<urn:epcglobal:cbv:unloading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:unloading> <http://www.w3.org/2000/01/rdf-schema#comment> "Unloading goods from a vehicle" .
-<urn:epcglobal:cbv:unloading> <http://www.w3.org/2000/01/rdf-schema#label> "Unloading" .
-<urn:epcglobal:cbv:ADD> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:epcis:action> .
-<urn:epcglobal:cbv:ADD> <http://www.w3.org/2000/01/rdf-schema#comment> "Add an object to the system" .
-<urn:epcglobal:cbv:ADD> <http://www.w3.org/2000/01/rdf-schema#label> "Add" .
-<urn:epcglobal:cbv:quality_control> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:quality_control> <http://www.w3.org/2000/01/rdf-schema#comment> "Quality control processes" .
-<urn:epcglobal:cbv:quality_control> <http://www.w3.org/2000/01/rdf-schema#label> "Quality Control" .
-<urn:epcglobal:cbv:TemperatureReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
-<urn:epcglobal:cbv:TemperatureReading> <http://www.w3.org/2000/01/rdf-schema#comment> "Temperature sensor reading" .
-<urn:epcglobal:cbv:TemperatureReading> <http://www.w3.org/2000/01/rdf-schema#label> "Temperature Reading" .
+<urn:epcglobal:cbv:loading> <http://www.w3.org/2000/01/rdf-schema#comment> "Loading goods onto a vehicle" .
+<urn:epcglobal:cbv:ShockReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
+<urn:epcglobal:cbv:ShockReading> <http://www.w3.org/2000/01/rdf-schema#label> "Shock Reading" .
+<urn:epcglobal:cbv:ShockReading> <http://www.w3.org/2000/01/rdf-schema#comment> "Shock or vibration sensor reading" .
 <urn:epcglobal:cbv:transporting> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
-<urn:epcglobal:cbv:transporting> <http://www.w3.org/2000/01/rdf-schema#comment> "Transporting goods from one location to another" .
 <urn:epcglobal:cbv:transporting> <http://www.w3.org/2000/01/rdf-schema#label> "Transporting" .
+<urn:epcglobal:cbv:transporting> <http://www.w3.org/2000/01/rdf-schema#comment> "Transporting goods from one location to another" .
+<urn:epcglobal:cbv:pricing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:pricing> <http://www.w3.org/2000/01/rdf-schema#label> "Pricing" .
+<urn:epcglobal:cbv:pricing> <http://www.w3.org/2000/01/rdf-schema#comment> "Setting prices for products" .
+<urn:epcglobal:cbv:Disposition> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<urn:epcglobal:cbv:Disposition> <http://www.w3.org/2000/01/rdf-schema#label> "Disposition" .
+<urn:epcglobal:cbv:Disposition> <http://www.w3.org/2000/01/rdf-schema#comment> "The state or condition of an item" .
+<urn:epcglobal:cbv:quarantined> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:quarantined> <http://www.w3.org/2000/01/rdf-schema#label> "Quarantined" .
+<urn:epcglobal:cbv:quarantined> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is quarantined" .
+<urn:epcglobal:cbv:ShipmentNotice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
+<urn:epcglobal:cbv:ShipmentNotice> <http://www.w3.org/2000/01/rdf-schema#label> "Shipment Notice" .
+<urn:epcglobal:cbv:ShipmentNotice> <http://www.w3.org/2000/01/rdf-schema#comment> "A shipment notice transaction" .
+<urn:epcglobal:cbv:DistributionCenter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
+<urn:epcglobal:cbv:DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#label> "Distribution Center" .
+<urn:epcglobal:cbv:DistributionCenter> <http://www.w3.org/2000/01/rdf-schema#comment> "A facility for distributing goods" .
+<urn:epcglobal:cbv:Invoice> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
+<urn:epcglobal:cbv:Invoice> <http://www.w3.org/2000/01/rdf-schema#label> "Invoice" .
+<urn:epcglobal:cbv:Invoice> <http://www.w3.org/2000/01/rdf-schema#comment> "An invoice transaction" .
+<urn:epcglobal:cbv:RetailStore> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
+<urn:epcglobal:cbv:RetailStore> <http://www.w3.org/2000/01/rdf-schema#label> "Retail Store" .
+<urn:epcglobal:cbv:RetailStore> <http://www.w3.org/2000/01/rdf-schema#comment> "A retail establishment" .
+<urn:epcglobal:cbv:Factory> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
+<urn:epcglobal:cbv:Factory> <http://www.w3.org/2000/01/rdf-schema#label> "Factory" .
+<urn:epcglobal:cbv:Factory> <http://www.w3.org/2000/01/rdf-schema#comment> "A manufacturing facility" .
+<urn:epcglobal:cbv:unloading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:unloading> <http://www.w3.org/2000/01/rdf-schema#label> "Unloading" .
+<urn:epcglobal:cbv:unloading> <http://www.w3.org/2000/01/rdf-schema#comment> "Unloading goods from a vehicle" .
+<urn:epcglobal:cbv:inspected> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:inspected> <http://www.w3.org/2000/01/rdf-schema#label> "Inspected" .
+<urn:epcglobal:cbv:inspected> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been inspected" .
+<urn:epcglobal:cbv:storing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:storing> <http://www.w3.org/2000/01/rdf-schema#label> "Storing" .
+<urn:epcglobal:cbv:storing> <http://www.w3.org/2000/01/rdf-schema#comment> "Storing goods in a warehouse" .
+<urn:epcglobal:cbv:displaying> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:displaying> <http://www.w3.org/2000/01/rdf-schema#label> "Displaying" .
+<urn:epcglobal:cbv:displaying> <http://www.w3.org/2000/01/rdf-schema#comment> "Displaying products for sale" .
+<urn:epcglobal:cbv:BusinessTransaction> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<urn:epcglobal:cbv:BusinessTransaction> <http://www.w3.org/2000/01/rdf-schema#label> "Business Transaction" .
+<urn:epcglobal:cbv:BusinessTransaction> <http://www.w3.org/2000/01/rdf-schema#comment> "A business transaction between parties" .
+<urn:epcglobal:cbv:ReceivingArea> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
+<urn:epcglobal:cbv:ReceivingArea> <http://www.w3.org/2000/01/rdf-schema#label> "Receiving Area" .
+<urn:epcglobal:cbv:ReceivingArea> <http://www.w3.org/2000/01/rdf-schema#comment> "Area designated for receiving goods" .
+<urn:epcglobal:cbv:owned> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:owned> <http://www.w3.org/2000/01/rdf-schema#label> "Owned" .
+<urn:epcglobal:cbv:owned> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is owned by the organization" .
+<urn:epcglobal:cbv:LocationReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
+<urn:epcglobal:cbv:LocationReading> <http://www.w3.org/2000/01/rdf-schema#label> "Location Reading" .
+<urn:epcglobal:cbv:LocationReading> <http://www.w3.org/2000/01/rdf-schema#comment> "GPS or location sensor reading" .
+<urn:epcglobal:cbv:Receipt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
+<urn:epcglobal:cbv:Receipt> <http://www.w3.org/2000/01/rdf-schema#label> "Receipt" .
+<urn:epcglobal:cbv:Receipt> <http://www.w3.org/2000/01/rdf-schema#comment> "A receipt transaction" .
+<urn:epcglobal:cbv:TemperatureReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
+<urn:epcglobal:cbv:TemperatureReading> <http://www.w3.org/2000/01/rdf-schema#label> "Temperature Reading" .
+<urn:epcglobal:cbv:TemperatureReading> <http://www.w3.org/2000/01/rdf-schema#comment> "Temperature sensor reading" .
+<urn:epcglobal:cbv:BusinessLocation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<urn:epcglobal:cbv:BusinessLocation> <http://www.w3.org/2000/01/rdf-schema#label> "Business Location" .
+<urn:epcglobal:cbv:BusinessLocation> <http://www.w3.org/2000/01/rdf-schema#comment> "A location where business activities occur" .
+<urn:epcglobal:cbv:assembling> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:assembling> <http://www.w3.org/2000/01/rdf-schema#label> "Assembling" .
+<urn:epcglobal:cbv:assembling> <http://www.w3.org/2000/01/rdf-schema#comment> "Putting components together to create a product" .
+<urn:epcglobal:cbv:consigned> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:consigned> <http://www.w3.org/2000/01/rdf-schema#label> "Consigned" .
+<urn:epcglobal:cbv:consigned> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is consigned to another party" .
+<urn:epcglobal:cbv:DELETE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:epcis:action> .
+<urn:epcglobal:cbv:DELETE> <http://www.w3.org/2000/01/rdf-schema#label> "Delete" .
+<urn:epcglobal:cbv:DELETE> <http://www.w3.org/2000/01/rdf-schema#comment> "Delete an object from the system" .
+<urn:epcglobal:cbv:BizStep> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<urn:epcglobal:cbv:BizStep> <http://www.w3.org/2000/01/rdf-schema#label> "Business Step" .
+<urn:epcglobal:cbv:BizStep> <http://www.w3.org/2000/01/rdf-schema#comment> "A business step in the supply chain process" .
+<urn:epcglobal:cbv:PurchaseOrder> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
+<urn:epcglobal:cbv:PurchaseOrder> <http://www.w3.org/2000/01/rdf-schema#label> "Purchase Order" .
+<urn:epcglobal:cbv:PurchaseOrder> <http://www.w3.org/2000/01/rdf-schema#comment> "A purchase order transaction" .
+<urn:epcglobal:cbv:ProductionLine> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
+<urn:epcglobal:cbv:ProductionLine> <http://www.w3.org/2000/01/rdf-schema#label> "Production Line" .
+<urn:epcglobal:cbv:ProductionLine> <http://www.w3.org/2000/01/rdf-schema#comment> "A manufacturing production line" .
+<urn:epcglobal:cbv:recalled> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:recalled> <http://www.w3.org/2000/01/rdf-schema#label> "Recalled" .
+<urn:epcglobal:cbv:recalled> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been recalled" .
+<urn:epcglobal:cbv:in_transit> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:in_transit> <http://www.w3.org/2000/01/rdf-schema#label> "In Transit" .
+<urn:epcglobal:cbv:in_transit> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is currently being transported" .
+<urn:epcglobal:cbv:SensorReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<urn:epcglobal:cbv:SensorReading> <http://www.w3.org/2000/01/rdf-schema#label> "Sensor Reading" .
+<urn:epcglobal:cbv:SensorReading> <http://www.w3.org/2000/01/rdf-schema#comment> "A sensor reading associated with an event" .
+<urn:epcglobal:cbv:reserved> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:reserved> <http://www.w3.org/2000/01/rdf-schema#label> "Reserved" .
+<urn:epcglobal:cbv:reserved> <http://www.w3.org/2000/01/rdf-schema#comment> "Item is reserved for a specific purpose" .
+<urn:epcglobal:cbv:SalesOrder> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessTransaction> .
+<urn:epcglobal:cbv:SalesOrder> <http://www.w3.org/2000/01/rdf-schema#label> "Sales Order" .
+<urn:epcglobal:cbv:SalesOrder> <http://www.w3.org/2000/01/rdf-schema#comment> "A sales order transaction" .
+<urn:epcglobal:cbv:ADD> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:epcis:action> .
+<urn:epcglobal:cbv:ADD> <http://www.w3.org/2000/01/rdf-schema#label> "Add" .
+<urn:epcglobal:cbv:ADD> <http://www.w3.org/2000/01/rdf-schema#comment> "Add an object to the system" .
+<urn:epcglobal:cbv:ShippingArea> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
+<urn:epcglobal:cbv:ShippingArea> <http://www.w3.org/2000/01/rdf-schema#label> "Shipping Area" .
+<urn:epcglobal:cbv:ShippingArea> <http://www.w3.org/2000/01/rdf-schema#comment> "Area designated for shipping activities" .
+<urn:epcglobal:cbv:OBSERVE> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:epcis:action> .
+<urn:epcglobal:cbv:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#label> "Observe" .
+<urn:epcglobal:cbv:OBSERVE> <http://www.w3.org/2000/01/rdf-schema#comment> "Observe an object in the system" .
+<urn:epcglobal:cbv:inventory_check> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:inventory_check> <http://www.w3.org/2000/01/rdf-schema#label> "Inventory Check" .
+<urn:epcglobal:cbv:inventory_check> <http://www.w3.org/2000/01/rdf-schema#comment> "Checking inventory levels" .
+<urn:epcglobal:cbv:manufacturing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:manufacturing> <http://www.w3.org/2000/01/rdf-schema#label> "Manufacturing" .
+<urn:epcglobal:cbv:manufacturing> <http://www.w3.org/2000/01/rdf-schema#comment> "Creating or producing a product" .
+<urn:epcglobal:cbv:quality_control> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:quality_control> <http://www.w3.org/2000/01/rdf-schema#label> "Quality Control" .
+<urn:epcglobal:cbv:quality_control> <http://www.w3.org/2000/01/rdf-schema#comment> "Quality control processes" .
+<urn:epcglobal:cbv:testing> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:testing> <http://www.w3.org/2000/01/rdf-schema#label> "Testing" .
+<urn:epcglobal:cbv:testing> <http://www.w3.org/2000/01/rdf-schema#comment> "Testing products for quality assurance" .
+<urn:epcglobal:cbv:production> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:production> <http://www.w3.org/2000/01/rdf-schema#label> "Production" .
+<urn:epcglobal:cbv:production> <http://www.w3.org/2000/01/rdf-schema#comment> "The process of making goods" .
+<urn:epcglobal:cbv:selling> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:selling> <http://www.w3.org/2000/01/rdf-schema#label> "Selling" .
+<urn:epcglobal:cbv:selling> <http://www.w3.org/2000/01/rdf-schema#comment> "Selling products to customers" .
+<urn:epcglobal:cbv:Store> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BusinessLocation> .
+<urn:epcglobal:cbv:Store> <http://www.w3.org/2000/01/rdf-schema#label> "Store" .
+<urn:epcglobal:cbv:Store> <http://www.w3.org/2000/01/rdf-schema#comment> "A store location" .
+<urn:epcglobal:cbv:customer_pickup> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:BizStep> .
+<urn:epcglobal:cbv:customer_pickup> <http://www.w3.org/2000/01/rdf-schema#label> "Customer Pickup" .
+<urn:epcglobal:cbv:customer_pickup> <http://www.w3.org/2000/01/rdf-schema#comment> "Customer pickup of ordered products" .
+<urn:epcglobal:cbv:HumidityReading> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:SensorReading> .
+<urn:epcglobal:cbv:HumidityReading> <http://www.w3.org/2000/01/rdf-schema#label> "Humidity Reading" .
+<urn:epcglobal:cbv:HumidityReading> <http://www.w3.org/2000/01/rdf-schema#comment> "Humidity sensor reading" .
+<urn:epcglobal:cbv:certified> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:certified> <http://www.w3.org/2000/01/rdf-schema#label> "Certified" .
+<urn:epcglobal:cbv:certified> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been certified" .
+<urn:epcglobal:cbv:destroyed> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:epcglobal:cbv:Disposition> .
+<urn:epcglobal:cbv:destroyed> <http://www.w3.org/2000/01/rdf-schema#label> "Destroyed" .
+<urn:epcglobal:cbv:destroyed> <http://www.w3.org/2000/01/rdf-schema#comment> "Item has been destroyed" .

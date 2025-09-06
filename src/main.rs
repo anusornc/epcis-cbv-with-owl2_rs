@@ -6,10 +6,13 @@ use epcis_knowledge_graph::ontology::reasoner::OntologyReasoner;
 use epcis_knowledge_graph::pipeline::EpcisEventPipeline;
 use epcis_knowledge_graph::models::epcis::EpcisEvent;
 use epcis_knowledge_graph::api::server::WebServer;
-use epcis_knowledge_graph::monitoring::metrics::{SystemMonitor, AlertConfig, AlertSeverity, AlertType};
+use epcis_knowledge_graph::monitoring::metrics::{SystemMonitor, AlertSeverity};
 use epcis_knowledge_graph::monitoring::logging::{init_logging, LoggingConfig};
-use tracing::{info, Level};
+use epcis_knowledge_graph::data_gen::{generator::EpcisDataGenerator, GeneratorConfig, DataScale, OutputFormat};
+use epcis_knowledge_graph::benchmarks::{run_performance_benchmarks, run_custom_benchmarks, DataScale as BenchmarkDataScale};
+use tracing::info;
 use std::time::Instant;
+use chrono;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -42,6 +45,14 @@ enum Commands {
         /// Database path
         #[arg(short, long, default_value = "./data")]
         db_path: String,
+
+        /// Use pre-generated sample data
+        #[arg(long)]
+        use_samples_data: bool,
+
+        /// Sample data scale (small, medium, large) - requires --use-samples-data
+        #[arg(long, default_value = "medium")]
+        samples_scale: String,
     },
 
     /// Load ontologies into the knowledge graph
@@ -241,6 +252,79 @@ enum Commands {
         #[arg(long, default_value = "10")]
         limit: usize,
     },
+
+    /// Load pre-generated sample data into the knowledge graph
+    LoadSamples {
+        /// Sample data scale (small, medium, large, xlarge)
+        #[arg(short, long, default_value = "medium")]
+        scale: String,
+
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Force reload (clear existing data first)
+        #[arg(long)]
+        force: bool,
+    },
+
+    /// Generate test data for the knowledge graph
+    Generate {
+        /// Output directory for generated data
+        #[arg(short, long, default_value = "./generated_data")]
+        output_path: String,
+
+        /// Scale of generation (small, medium, large, xlarge)
+        #[arg(short, long, default_value = "medium")]
+        scale: String,
+
+        /// Output format (turtle, ntriples, jsonld)
+        #[arg(short, long, default_value = "turtle")]
+        format: String,
+
+        /// Number of locations to generate
+        #[arg(long)]
+        locations: Option<usize>,
+
+        /// Number of products to generate
+        #[arg(long)]
+        products: Option<usize>,
+
+        /// Number of events to generate
+        #[arg(long)]
+        events: Option<usize>,
+
+        /// Load generated data into database
+        #[arg(long)]
+        load: bool,
+
+        /// Database path (for loading)
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+    },
+
+    /// Run performance benchmarks
+    Benchmark {
+        /// Database path
+        #[arg(short, long, default_value = "./data")]
+        db_path: String,
+
+        /// Number of iterations for each test
+        #[arg(long, default_value = "10")]
+        iterations: usize,
+
+        /// Data scale (small, medium, large)
+        #[arg(long, default_value = "medium")]
+        scale: String,
+
+        /// Include memory metrics (platform dependent)
+        #[arg(long)]
+        include_memory: bool,
+
+        /// Output format (json, text)
+        #[arg(short, long, default_value = "text")]
+        format: String,
+    },
 }
 
 #[tokio::main]
@@ -273,7 +357,7 @@ async fn main() -> Result<(), EpcisKgError> {
     info!("Starting EPCIS Knowledge Graph with configuration from: {}", args.config);
 
     match args.command {
-        Commands::Serve { port, db_path } => {
+        Commands::Serve { port, db_path, use_samples_data, samples_scale } => {
             let final_port = if port != 8080 { port } else { config.server_port };
             let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
             
@@ -285,6 +369,20 @@ async fn main() -> Result<(), EpcisKgError> {
             // Initialize the store
             let store = OxigraphStore::new(&final_db_path)?;
             
+            // Load sample data if requested
+            if use_samples_data {
+                info!("Loading sample data with scale: {}", samples_scale);
+                match load_sample_data(&samples_scale, &final_db_path, false) {
+                    Ok(count) => {
+                        println!("✓ Loaded {} triples of sample data", count);
+                    },
+                    Err(e) => {
+                        eprintln!("⚠️  Failed to load sample data: {}", e);
+                        eprintln!("⚠️  Continuing with empty database...");
+                    }
+                }
+            }
+            
             // Create and run the web server
             let web_server = WebServer::new(config.clone(), store).await?;
             
@@ -292,6 +390,9 @@ async fn main() -> Result<(), EpcisKgError> {
             println!("📊 Server will be available at: http://localhost:{}", final_port);
             println!("🔍 SPARQL endpoint: http://localhost:{}/api/v1/sparql", final_port);
             println!("📖 API documentation: http://localhost:{}/", final_port);
+            if use_samples_data {
+                println!("📦 Sample data loaded ({} scale)", samples_scale);
+            }
             println!("⏹️  Press Ctrl+C to stop the server");
             
             if let Err(e) = web_server.run(final_port).await {
@@ -422,6 +523,171 @@ async fn main() -> Result<(), EpcisKgError> {
                 action, final_db_path
             );
             perform_monitoring_action(&final_db_path, &action, format, limit)?;
+        }
+        Commands::LoadSamples { scale, db_path, force } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            info!(
+                "Loading sample data with scale '{}' into database at {}",
+                scale, final_db_path
+            );
+            
+            match load_sample_data(&scale, &final_db_path, force) {
+                Ok(count) => {
+                    println!("✓ Successfully loaded {} triples of sample data", count);
+                    println!("✓ Sample data scale: {}", scale);
+                    if force {
+                        println!("✓ Cleared existing data before loading");
+                    }
+                },
+                Err(e) => {
+                    eprintln!("✗ Failed to load sample data: {}", e);
+                    return Err(EpcisKgError::Config(format!("Failed to load sample data: {}", e)));
+                }
+            }
+        }
+        Commands::Generate { 
+            output_path, 
+            scale, 
+            format, 
+            locations, 
+            products, 
+            events, 
+            load, 
+            db_path 
+        } => {
+            info!(
+                "Generating test data with scale '{}' to output path {}",
+                scale, output_path
+            );
+            
+            // Parse scale
+            let data_scale = match scale.to_lowercase().as_str() {
+                "small" => DataScale::Small,
+                "medium" => DataScale::Medium,
+                "large" => DataScale::Large,
+                "xlarge" => DataScale::XLarge,
+                _ => DataScale::Medium,
+            };
+            
+            // Parse output format
+            let output_format = match format.to_lowercase().as_str() {
+                "turtle" => OutputFormat::Turtle,
+                "ntriples" => OutputFormat::NTriples,
+                "jsonld" => OutputFormat::JsonLd,
+                _ => OutputFormat::Turtle,
+            };
+            
+            // Create generator config
+            let mut generator_config = GeneratorConfig {
+                scale: data_scale,
+                output_format,
+                output_path: std::path::PathBuf::from(&output_path),
+                custom_counts: None,
+            };
+            
+            // Override with custom counts if provided
+            if locations.is_some() || products.is_some() || events.is_some() {
+                generator_config.custom_counts = Some((
+                    locations.unwrap_or(0),
+                    products.unwrap_or(0),
+                    events.unwrap_or(0),
+                ));
+            }
+            
+            // Generate data
+            let generator = EpcisDataGenerator::new();
+            match generator.generate_dataset(&generator_config) {
+                Ok(result) => {
+                    println!("✓ Data generation completed successfully");
+                    println!("  - Generated {} triples", result.triple_count);
+                    println!("  - Generated {} events", result.event_count);
+                    println!("  - Generated {} locations", result.location_count);
+                    println!("  - Generated {} products", result.product_count);
+                    println!("  - Generation time: {}ms", result.generation_time_ms);
+                    
+                    for file in &result.output_files {
+                        println!("  - Output file: {}", file);
+                    }
+                    
+                    // Load data into database if requested
+                    if load {
+                        let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+                        info!("Loading generated data into database at {}", final_db_path);
+                        
+                        for file in &result.output_files {
+                            match load_generated_data(file, &final_db_path) {
+                                Ok(count) => {
+                                    println!("✓ Loaded {} triples from {}", count, file);
+                                },
+                                Err(e) => {
+                                    eprintln!("✗ Failed to load data from {}: {}", file, e);
+                                }
+                            }
+                        }
+                    }
+                },
+                Err(e) => {
+                    eprintln!("✗ Data generation failed: {}", e);
+                    return Err(EpcisKgError::Config(format!("Failed to generate data: {}", e)));
+                }
+            }
+        }
+        Commands::Benchmark { db_path, iterations, scale, include_memory, format } => {
+            let final_db_path = if db_path != "./data" { db_path } else { config.database_path.clone() };
+            
+            println!("🚀 Running performance benchmarks...");
+            println!("📊 Configuration:");
+            println!("  - Database: {}", final_db_path);
+            println!("  - Iterations: {}", iterations);
+            println!("  - Scale: {}", scale);
+            println!("  - Memory metrics: {}", include_memory);
+            println!("  - Format: {}", format);
+            
+            // Parse data scale
+            let benchmark_scale = match scale.to_lowercase().as_str() {
+                "small" => BenchmarkDataScale::Small,
+                "medium" => BenchmarkDataScale::Medium,
+                "large" => BenchmarkDataScale::Large,
+                _ => BenchmarkDataScale::Medium,
+            };
+            
+            // Run benchmarks
+            let start_time = std::time::Instant::now();
+            let result = if iterations == 10 && scale == "medium" {
+                // Use default configuration
+                run_performance_benchmarks(std::path::Path::new(&final_db_path))
+            } else {
+                // Use custom configuration
+                run_custom_benchmarks(std::path::Path::new(&final_db_path), iterations, benchmark_scale)
+            };
+            
+            let total_time = start_time.elapsed();
+            
+            match result {
+                Ok(()) => {
+                    println!("\n✅ Performance benchmarks completed successfully!");
+                    println!("⏱️  Total benchmark time: {:?}", total_time);
+                    
+                    if format == "json" {
+                        // JSON output would require collecting results from the benchmarks
+                        // For now, just show completion
+                        let json_output = serde_json::json!({
+                            "status": "completed",
+                            "total_time_ms": total_time.as_millis() as u64,
+                            "iterations": iterations,
+                            "scale": scale,
+                            "memory_metrics": include_memory,
+                            "timestamp": chrono::Utc::now().to_rfc3339()
+                        });
+                        println!("{}", serde_json::to_string_pretty(&json_output)?);
+                    }
+                },
+                Err(e) => {
+                    eprintln!("❌ Performance benchmarks failed: {}", e);
+                    return Err(e);
+                }
+            }
         }
         Commands::Config => {
             show_configuration(&config)?;
@@ -1007,7 +1273,7 @@ fn perform_inference_with_materialization(db_path: &str, strategy: &str, clear: 
                 if !materialized.is_empty() {
                     println!("\n=== Materialized Triples (Sample) ===");
                     let mut count = 0;
-                    for (graph_name, triples) in materialized {
+                    for (_graph_name, triples) in materialized {
                         for triple in triples {
                             if count >= 5 { break; }
                             println!("  {}. {} {} {}", count + 1, triple.subject, triple.predicate, triple.object);
@@ -1065,7 +1331,7 @@ fn manage_materialized_triples(db_path: &str, action: &str, graph: &Option<Strin
                 if total_triples > 0 {
                     println!("\nAll materialized triples:");
                     let mut count = 0;
-                    for (graph_name, triples) in materialized {
+                    for (_graph_name, triples) in materialized {
                         for triple in triples {
                             println!("  {}. {} {} {}", count + 1, triple.subject, triple.predicate, triple.object);
                             count += 1;
@@ -1190,7 +1456,7 @@ fn perform_incremental_inference(db_path: &str, triples_file: &str, format: &str
                 if !materialized.is_empty() {
                     println!("\n=== Newly Materialized Triples (Sample) ===");
                     let mut count = 0;
-                    for (graph_name, triples) in materialized {
+                    for (_graph_name, triples) in materialized {
                         for triple in triples {
                             if count >= 3 { break; }
                             println!("  {}. {} {} {}", count + 1, triple.subject, triple.predicate, triple.object);
@@ -1342,7 +1608,7 @@ fn run_performance_benchmark(reasoner: &mut OntologyReasoner) -> Result<(), Epci
 }
 
 /// Perform monitoring actions
-fn perform_monitoring_action(db_path: &str, action: &str, format: String, limit: usize) -> Result<(), EpcisKgError> {
+fn perform_monitoring_action(_db_path: &str, action: &str, format: String, limit: usize) -> Result<(), EpcisKgError> {
     let monitor = SystemMonitor::new();
     
     match action.to_lowercase().as_str() {
@@ -1534,4 +1800,67 @@ fn perform_monitoring_action(db_path: &str, action: &str, format: String, limit:
     }
     
     Ok(())
+}
+
+/// Load pre-generated sample data into the knowledge graph
+fn load_sample_data(scale: &str, db_path: &str, force: bool) -> Result<usize, EpcisKgError> {
+    info!("Loading sample data with scale '{}' into database at {}", scale, db_path);
+    
+    // Clear existing data if force is enabled
+    if force {
+        let path = std::path::Path::new(db_path);
+        if path.exists() {
+            info!("Clearing existing database at {}", db_path);
+            std::fs::remove_dir_all(path)?;
+        }
+    }
+    
+    // Determine sample file path based on scale
+    let sample_file = match scale.to_lowercase().as_str() {
+        "small" => "samples/epcis_data_small.ttl",
+        "medium" => "samples/epcis_data_medium.ttl",
+        "large" => "samples/epcis_data_large.ttl",
+        "xlarge" => "samples/epcis_data_xlarge.ttl",
+        _ => "samples/epcis_data_medium.ttl",
+    };
+    
+    // Check if sample file exists
+    if !std::path::Path::new(sample_file).exists() {
+        return Err(EpcisKgError::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Sample file not found: {}. Run 'cargo run -- generate --scale {} --output-path samples/' first.", sample_file, scale),
+        )));
+    }
+    
+    // Load the sample data
+    load_generated_data(sample_file, db_path)
+}
+
+/// Load generated data into the knowledge graph
+fn load_generated_data(file_path: &str, db_path: &str) -> Result<usize, EpcisKgError> {
+    info!("Loading data from {} into database at {}", file_path, db_path);
+    
+    // Check if file exists
+    if !std::path::Path::new(file_path).exists() {
+        return Err(EpcisKgError::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("File not found: {}", file_path),
+        )));
+    }
+    
+    // Initialize store
+    let mut store = OxigraphStore::new(db_path)?;
+    
+    // Load the ontology data using the loader
+    let loader = OntologyLoader::new();
+    match loader.load_ontology(file_path) {
+        Ok(ontology_data) => {
+            store.store_ontology_data(&ontology_data)?;
+            println!("✓ Successfully loaded {} triples from {}", ontology_data.triples_count, file_path);
+            Ok(ontology_data.triples_count)
+        },
+        Err(e) => {
+            Err(EpcisKgError::Storage(format!("Failed to load data from {}: {}", file_path, e)))
+        }
+    }
 }

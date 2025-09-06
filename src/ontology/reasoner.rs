@@ -303,7 +303,7 @@ impl OntologyReasoner {
     }
     
     /// Count levels in class hierarchy
-    fn count_hierarchy_levels(&self, hierarchy: &owl2_rs::reasoner::ClassHierarchy) -> usize {
+    fn count_hierarchy_levels(&self, _hierarchy: &owl2_rs::reasoner::ClassHierarchy) -> usize {
         // This is a simplified implementation
         // In practice, you'd analyze the actual hierarchy structure
         3 // Default assumption for demo purposes
@@ -484,7 +484,7 @@ impl OntologyReasoner {
         
         for triple in ontology_data.graph.iter() {
             let subject_str = format!("{}", triple.subject);
-            let predicate_str = format!("{}", triple.predicate);
+            let _predicate_str = format!("{}", triple.predicate);
             let object_str = format!("{}", triple.object);
             
             // Check for EPCIS core classes
@@ -518,7 +518,7 @@ impl OntologyReasoner {
     fn analyze_reasoning_capabilities(&self, ontology: &owl2_rs::Ontology) -> ReasoningCapabilities {
         let mut has_class_hierarchy = false;
         let mut has_property_hierarchy = false;
-        let mut has_complex_restrictions = false;
+        let has_complex_restrictions = false;
         let mut has_individual_assertions = false;
         
         for axiom in &ontology.axioms {
@@ -634,7 +634,7 @@ impl OntologyReasoner {
     
     /// Analyze RL profile specific characteristics
     fn analyze_rl_profile(&self, ontology: &owl2_rs::Ontology) -> RlProfileAnalysis {
-        let mut complex_class_expressions = 0;
+        let complex_class_expressions = 0;
         let mut property_chains = 0;
         let mut simple_rules = 0;
         
@@ -667,7 +667,7 @@ impl OntologyReasoner {
         
         for triple in ontology_data.graph.iter() {
             let subject_str = format!("{}", triple.subject);
-            let predicate_str = format!("{}", triple.predicate);
+            let _predicate_str = format!("{}", triple.predicate);
             let object_str = format!("{}", triple.object);
             
             // Check for EPCIS core classes
@@ -786,7 +786,7 @@ impl OntologyReasoner {
     }
     
     /// Materialize class hierarchy as RDF triples
-    fn materialize_class_hierarchy(&self, class_hierarchy: &owl2_rs::reasoner::ClassHierarchy) -> Result<Vec<oxrdf::Triple>, EpcisKgError> {
+    fn materialize_class_hierarchy(&self, _class_hierarchy: &owl2_rs::reasoner::ClassHierarchy) -> Result<Vec<oxrdf::Triple>, EpcisKgError> {
         let mut triples = Vec::new();
         
         // This is a simplified implementation - in practice you'd traverse the actual hierarchy
@@ -1102,7 +1102,7 @@ impl OntologyReasoner {
         if let Some(ref mut store) = self.store {
             // Get all triples from store
             let all_triples: Vec<oxrdf::Triple> = store.get_statistics()
-                .map(|stats| {
+                .map(|_stats| {
                     // This is a simplified approach - in practice you'd get actual triples
                     Vec::new()
                 })
@@ -1116,7 +1116,7 @@ impl OntologyReasoner {
             let inferred_results: Vec<Result<Vec<oxrdf::Triple>, EpcisKgError>> = batches
                 .par_iter()
                 .map(|batch| self.process_batch_parallel_readonly(batch))
-                .collect();
+                .collect::<Vec<_>>();
             
             // Collect results and update cache
             for (batch, result) in batches.iter().zip(inferred_results) {

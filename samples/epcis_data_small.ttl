@@ -1,0 +1,211 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix epcis: <urn:epcglobal:epcis:> .
+@prefix cbv: <urn:epcglobal:cbv:> .
+@prefix ex: <http://example.com/> .
+
+# EPCIS 2.0 Core Classes
+epcis:ObjectEvent rdf:type rdfs:Class ;
+    rdfs:label "Object Event" ;
+    rdfs:comment "An event that records the association of one or more objects with a business step at a specific point in time and location" .
+
+epcis:AggregationEvent rdf:type rdfs:Class ;
+    rdfs:label "Aggregation Event" ;
+    rdfs:comment "An event that records the physical aggregation of objects into a parent object" .
+
+epcis:TransactionEvent rdf:type rdfs:Class ;
+    rdfs:label "Transaction Event" ;
+    rdfs:comment "An event that records the transfer of custody or ownership of objects" .
+
+epcis:TransformationEvent rdf:type rdfs:Class ;
+    rdfs:label "Transformation Event" ;
+    rdfs:comment "An event that records the transformation of input objects into output objects" .
+
+# Sample Business Entities
+ex:manufacturer1 rdf:type ex:BusinessEntity ;
+    rdfs:label "TechCorp Manufacturing" ;
+    ex:name "TechCorp Manufacturing" ;
+    ex:entityType "Manufacturer" ;
+    ex:taxId "TAX-123456789" ;
+    ex:email "contact@techcorp.com" ;
+    ex:phone "+1-555-123-4567" .
+
+ex:distributor1 rdf:type ex:BusinessEntity ;
+    rdfs:label "Global Distributors Inc" ;
+    ex:name "Global Distributors Inc" ;
+    ex:entityType "Distributor" ;
+    ex:taxId "TAX-987654321" ;
+    ex:email "sales@globaldistributors.com" ;
+    ex:phone "+1-555-987-6543" .
+
+ex:retailer1 rdf:type ex:BusinessEntity ;
+    rdfs:label "Retail Solutions Ltd" ;
+    ex:name "Retail Solutions Ltd" ;
+    ex:entityType "Retailer" ;
+    ex:taxId "TAX-456789123" ;
+    ex:email "info@retailsolutions.com" ;
+    ex:phone "+1-555-456-7890" .
+
+# Sample Locations
+ex:factory1 rdf:type ex:Location ;
+    rdfs:label "TechCorp Factory A" ;
+    ex:name "TechCorp Factory A" ;
+    ex:locationType "Factory" ;
+    ex:address "123 Industrial Ave, Manufacturing City, MC 12345" ;
+    ex:coordinates "40.7128, -74.0060" ;
+    ex:capacity "100000"^^xsd:integer .
+
+ex:warehouse1 rdf:type ex:Location ;
+    rdfs:label "Central Distribution Center" ;
+    ex:name "Central Distribution Center" ;
+    ex:locationType "Warehouse" ;
+    ex:address "456 Logistics Way, Distribution City, DC 67890" ;
+    ex:coordinates "40.7589, -73.9851" ;
+    ex:capacity "50000"^^xsd:integer .
+
+ex:store1 rdf:type ex:Location ;
+    rdfs:label "Downtown Retail Store" ;
+    ex:name "Downtown Retail Store" ;
+    ex:locationType "RetailStore" ;
+    ex:address "789 Main Street, Retail City, RC 13579" ;
+    ex:coordinates "40.7505, -73.9934" ;
+    ex:capacity "5000"^^xsd:integer .
+
+# Sample Products
+ex:product1 rdf:type ex:Product ;
+    rdfs:label "Smartphone Model X" ;
+    ex:name "Smartphone Model X" ;
+    ex:epc "urn:epc:id:sgtin:0614141.123456.000001" ;
+    ex:productType "Smartphone" ;
+    ex:category "Electronics" ;
+    ex:manufacturer "TechCorp Manufacturing" ;
+    ex:weight "0.2"^^xsd:decimal ;
+    ex:manufacturingDate "2024-01-15T10:30:00Z"^^xsd:dateTime ;
+    ex:expirationDate "2026-01-15T10:30:00Z"^^xsd:dateTime .
+
+ex:product2 rdf:type ex:Product ;
+    rdfs:label "Laptop Pro 15" ;
+    ex:name "Laptop Pro 15" ;
+    ex:epc "urn:epc:id:sgtin:0614141.123456.000002" ;
+    ex:productType "Laptop" ;
+    ex:category "Electronics" ;
+    ex:manufacturer "TechCorp Manufacturing" ;
+    ex:weight "2.1"^^xsd:decimal ;
+    ex:manufacturingDate "2024-01-16T14:45:00Z"^^xsd:dateTime ;
+    ex:expirationDate "2026-01-16T14:45:00Z"^^xsd:dateTime .
+
+ex:product3 rdf:type ex:Product ;
+    rdfs:label "Wireless Headphones" ;
+    ex:name "Wireless Headphones" ;
+    ex:epc "urn:epc:id:sgtin:0614141.123456.000003" ;
+    ex:productType "Headphones" ;
+    ex:category "Electronics" ;
+    ex:manufacturer "TechCorp Manufacturing" ;
+    ex:weight "0.3"^^xsd:decimal ;
+    ex:manufacturingDate "2024-01-17T09:15:00Z"^^xsd:dateTime ;
+    ex:expirationDate "2025-07-17T09:15:00Z"^^xsd:dateTime .
+
+# Sample Supply Chain Events
+ex:event1 rdf:type epcis:ObjectEvent ;
+    epcis:eventID "MANUF-2024-001" ;
+    epcis:eventTime "2024-01-15T11:00:00Z"^^xsd:dateTime ;
+    epcis:recordTime "2024-01-15T11:05:00Z"^^xsd:dateTime ;
+    epcis:action "ADD" ;
+    epcis:bizStep "urn:epcglobal:cbv:bizstep:manufacturing" ;
+    epcis:disposition "urn:epcglobal:cbv:disp:in_progress" ;
+    epcis:epcList "urn:epc:id:sgtin:0614141.123456.000001" ;
+    epcis:readPoint ex:factory1_line1 ;
+    epcis:bizLocation ex:factory1 ;
+    epcis:quantity "1"^^xsd:integer .
+
+ex:event2 rdf:type epcis:ObjectEvent ;
+    epcis:eventID "QUAL-2024-001" ;
+    epcis:eventTime "2024-01-15T12:00:00Z"^^xsd:dateTime ;
+    epcis:recordTime "2024-01-15T12:15:00Z"^^xsd:dateTime ;
+    epcis:action "OBSERVE" ;
+    epcis:bizStep "urn:epcglobal:cbv:bizstep:quality_control" ;
+    epcis:disposition "urn:epcglobal:cbv:disp:certified" ;
+    epcis:epcList "urn:epc:id:sgtin:0614141.123456.000001" ;
+    epcis:readPoint ex:factory1_qc1 ;
+    epcis:bizLocation ex:factory1 ;
+    epcis:quantity "1"^^xsd:integer .
+
+ex:event3 rdf:type epcis:ObjectEvent ;
+    epcis:eventID "SHIP-2024-001" ;
+    epcis:eventTime "2024-01-16T09:00:00Z"^^xsd:dateTime ;
+    epcis:recordTime "2024-01-16T09:10:00Z"^^xsd:dateTime ;
+    epcis:action "OBSERVE" ;
+    epcis:bizStep "urn:epcglobal:cbv:bizstep:shipping" ;
+    epcis:disposition "urn:epcglobal:cbv:disp:in_transit" ;
+    epcis:epcList "urn:epc:id:sgtin:0614141.123456.000001" ;
+    epcis:readPoint ex:factory1_dock1 ;
+    epcis:bizLocation ex:factory1 ;
+    epcis:quantity "1"^^xsd:integer .
+
+ex:event4 rdf:type epcis:ObjectEvent ;
+    epcis:eventID "RECV-2024-001" ;
+    epcis:eventTime "2024-01-17T14:00:00Z"^^xsd:dateTime ;
+    epcis:recordTime "2024-01-17T14:10:00Z"^^xsd:dateTime ;
+    epcis:action "OBSERVE" ;
+    epcis:bizStep "urn:epcglobal:cbv:bizstep:receiving" ;
+    epcis:disposition "urn:epcglobal:cbv:disp:active" ;
+    epcis:epcList "urn:epc:id:sgtin:0614141.123456.000001" ;
+    epcis:readPoint ex:warehouse1_dock1 ;
+    epcis:bizLocation ex:warehouse1 ;
+    epcis:quantity "1"^^xsd:integer .
+
+ex:event5 rdf:type epcis:ObjectEvent ;
+    epcis:eventID "RETAIL-2024-001" ;
+    epcis:eventTime "2024-01-20T10:00:00Z"^^xsd:dateTime ;
+    epcis:recordTime "2024-01-20T10:05:00Z"^^xsd:dateTime ;
+    epcis:action "OBSERVE" ;
+    epcis:bizStep "urn:epcglobal:cbv:bizstep:displaying" ;
+    epcis:disposition "urn:epcglobal:cbv:disp:active" ;
+    epcis:epcList "urn:epc:id:sgtin:0614141.123456.000001" ;
+    epcis:readPoint ex:store1_shelf1 ;
+    epcis:bizLocation ex:store1 ;
+    epcis:quantity "1"^^xsd:integer .
+
+ex:event6 rdf:type epcis:ObjectEvent ;
+    epcis:eventID "SALE-2024-001" ;
+    epcis:eventTime "2024-01-25T15:30:00Z"^^xsd:dateTime ;
+    epcis:recordTime "2024-01-25T15:35:00Z"^^xsd:dateTime ;
+    epcis:action "DELETE" ;
+    epcis:bizStep "urn:epcglobal:cbv:bizstep:selling" ;
+    epcis:disposition "urn:epcglobal:cbv:disp:sold" ;
+    epcis:epcList "urn:epc:id:sgtin:0614141.123456.000001" ;
+    epcis:readPoint ex:store1_register1 ;
+    epcis:bizLocation ex:store1 ;
+    epcis:quantity "1"^^xsd:integer .
+
+# Business Transactions
+ex:transaction1 rdf:type ex:BusinessTransaction ;
+    ex:transactionType "urn:epcglobal:cbv:btt:po" ;
+    ex:transactionId "PO-2024-001" ;
+    ex:relatedEvent ex:event3 .
+
+ex:transaction2 rdf:type ex:BusinessTransaction ;
+    ex:transactionType "urn:epcglobal:cbv:btt:inv" ;
+    ex:transactionId "INV-2024-001" ;
+    ex:relatedEvent ex:event6 .
+
+# Supply Chain Relationships
+ex:product1 ex:manufacturedBy ex:manufacturer1 .
+ex:product2 ex:manufacturedBy ex:manufacturer1 .
+ex:product3 ex:manufacturedBy ex:manufacturer1 .
+
+ex:factory1 ex:ownedBy ex:manufacturer1 .
+ex:warehouse1 ex:ownedBy ex:distributor1 .
+ex:store1 ex:ownedBy ex:retailer1 .
+
+ex:event1 ex:occurredAt ex:factory1 .
+ex:event2 ex:occurredAt ex:factory1 .
+ex:event3 ex:occurredAt ex:factory1 .
+ex:event4 ex:occurredAt ex:warehouse1 .
+ex:event5 ex:occurredAt ex:store1 .
+ex:event6 ex:occurredAt ex:store1 .
+
+# Product Journey
+ex:product1 ex:hasEvent ex:event1, ex:event2, ex:event3, ex:event4, ex:event5, ex:event6 .
+ex:product1 ex:hasJourney "Factory → Quality Control → Shipping → Warehouse → Retail Store → Sold" .

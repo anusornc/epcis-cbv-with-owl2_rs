@@ -227,7 +227,7 @@ impl EpcisEventPipeline {
     
     /// Validate event semantics using ontologies
     fn validate_event_semantics(&self, event: &EpcisEvent) -> Result<ValidationResult, EpcisKgError> {
-        let mut errors = Vec::new();
+        let errors = Vec::new();
         let mut warnings = Vec::new();
         
         // Validate business step against ontology
@@ -430,7 +430,7 @@ impl EpcisEventPipeline {
     }
     
     /// Store event in the knowledge graph
-    async fn store_event(&self, event: &EpcisEvent, processing_result: &ProcessingResult) -> Result<(), EpcisKgError> {
+    async fn store_event(&self, _event: &EpcisEvent, _processing_result: &ProcessingResult) -> Result<(), EpcisKgError> {
         // Note: We can't modify the Arc<OxigraphStore> directly in this context
         // The actual storage happens in process_event_internal
         Ok(())
@@ -507,14 +507,14 @@ impl EpcisEventPipeline {
     }
     
     /// Check if business step is valid according to ontology
-    fn is_valid_business_step(&self, biz_step: &str) -> Result<bool, EpcisKgError> {
+    fn is_valid_business_step(&self, _biz_step: &str) -> Result<bool, EpcisKgError> {
         // For now, return true for basic validation
         // In a real implementation, this would query the knowledge graph
         Ok(true)
     }
     
     /// Check if disposition is valid according to ontology
-    fn is_valid_disposition(&self, disposition: &str) -> Result<bool, EpcisKgError> {
+    fn is_valid_disposition(&self, _disposition: &str) -> Result<bool, EpcisKgError> {
         // For now, return true for basic validation
         // In a real implementation, this would query the knowledge graph
         Ok(true)

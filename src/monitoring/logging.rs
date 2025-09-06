@@ -5,7 +5,6 @@ use std::fs;
 use chrono::{DateTime, Utc};
 use serde::{Serialize, Deserialize};
 use std::sync::Arc;
-use parking_lot::Mutex;
 
 /// Logging configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
