@@ -96,6 +96,9 @@ build/
 # Claude Code
 .claude/
 
+# Markdown files (root directory documentation)
+*.md
+
 # Archives
 *.tar.gz
 *.zip
