@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPCIS Knowledge Graph</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>EPCIS Knowledge Graph</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link" data-page="dashboard">Dashboard</a>
+                <a href="/query" class="nav-link" data-page="query">SPARQL Query</a>
+                <a href="/ontology" class="nav-link" data-page="ontology">Ontology</a>
+                <a href="/events" class="nav-link" data-page="events">Events</a>
+                <a href="/monitoring" class="nav-link" data-page="monitoring">Monitoring</a>
+                <a href="/visualization" class="nav-link" data-page="visualization">Graph Visualization</a>
+            </div>
+        </nav>
+        
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <h1 class="page-title">Dashboard</h1>
+                
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>System Metrics</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="metrics-grid" id="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-label">Total Triples</div>
+                                    <div class="metric-value" id="total-triples">-</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">Query Rate</div>
+                                    <div class="metric-value" id="query-rate">-</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">Memory Usage</div>
+                                    <div class="metric-value" id="memory-usage">-</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">Active Connections</div>
+                                    <div class="metric-value" id="active-connections">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Recent Alerts</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="alerts-list" id="alerts-list">
+                                <div class="loading-spinner">
+                                    <div class="spinner"></div>
+                                    <p>Loading alerts...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="quick-actions">
+                                <a href="/query" class="action-button" data-page="query">
+                                    <div class="action-icon">🔍</div>
+                                    <div class="action-text">
+                                        <div class="action-title">SPARQL Query</div>
+                                        <div class="action-desc">Execute SPARQL queries</div>
+                                    </div>
+                                </a>
+                                <a href="/ontology" class="action-button" data-page="ontology">
+                                    <div class="action-icon">📚</div>
+                                    <div class="action-text">
+                                        <div class="action-title">Ontology Browser</div>
+                                        <div class="action-desc">Explore ontologies</div>
+                                    </div>
+                                </a>
+                                <a href="/events" class="action-button" data-page="events">
+                                    <div class="action-icon">📝</div>
+                                    <div class="action-text">
+                                        <div class="action-title">Event Processing</div>
+                                        <div class="action-desc">Process EPCIS events</div>
+                                    </div>
+                                </a>
+                                <a href="/monitoring" class="action-button" data-page="monitoring">
+                                    <div class="action-icon">📊</div>
+                                    <div class="action-text">
+                                        <div class="action-title">Monitoring</div>
+                                        <div class="action-desc">System monitoring</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SPARQL Query Page -->
+            <div id="query-page" class="page">
+                <h1 class="page-title">SPARQL Query Interface</h1>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Query Editor</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="query-editor-container">
+                            <textarea 
+                                id="sparql-query"
+                                class="query-editor"
+                                placeholder="Enter your SPARQL query here..."
+                                rows="10"
+                            >SELECT * WHERE { ?s ?p ?o } LIMIT 10</textarea>
+                            <div class="query-actions">
+                                <button id="execute-query" class="primary-button">Execute Query</button>
+                                <button id="clear-query" class="secondary-button">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Query Results</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="query-results" id="query-results">
+                            <p>Query results will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ontology Page -->
+            <div id="ontology-page" class="page">
+                <h1 class="page-title">Ontology Management</h1>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Loaded Ontologies</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="ontology-list" id="ontology-list">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p>Loading ontologies...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ontology Browser</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="ontology-browser">
+                            <p>Interactive ontology browser will be implemented here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Events Page -->
+            <div id="events-page" class="page">
+                <h1 class="page-title">Event Processing</h1>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>EPCIS Event Editor</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="event-editor">
+                            <p>EPCIS event editor will be implemented here...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Event Timeline</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="event-timeline">
+                            <p>Event timeline visualization will be implemented here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Monitoring Page -->
+            <div id="monitoring-page" class="page">
+                <h1 class="page-title">Monitoring Dashboard</h1>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>System Metrics</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="system-metrics" id="system-metrics">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p>Loading system metrics...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Performance Charts</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="performance-charts">
+                            <p>Performance charts and graphs will be implemented here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graph Visualization Page -->
+            <div id="visualization-page" class="page">
+                <h1 class="page-title">Knowledge Graph Visualization</h1>
+                
+                <div class="visualization-controls">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Graph Controls</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="control-group">
+                                <label for="graph-type">Graph Type:</label>
+                                <select id="graph-type">
+                                    <option value="force">Force-Directed</option>
+                                    <option value="hierarchical">Hierarchical</option>
+                                    <option value="radial">Radial</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="node-limit">Node Limit:</label>
+                                <input type="number" id="node-limit" value="50" min="10" max="200">
+                            </div>
+                            <div class="control-group">
+                                <button id="load-graph" class="btn btn-primary">Load Graph</button>
+                                <button id="reset-graph" class="btn btn-secondary">Reset View</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="visualization-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Knowledge Graph</h3>
+                        </div>
+                        <div class="card-content">
+                            <div id="graph-container" class="graph-container">
+                                <div class="loading-spinner">
+                                    <div class="spinner"></div>
+                                    <p>Loading knowledge graph...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="visualization-info">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Graph Information</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Total Nodes:</div>
+                                    <div class="info-value" id="total-nodes">0</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Total Edges:</div>
+                                    <div class="info-value" id="total-edges">0</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Graph Type:</div>
+                                    <div class="info-value" id="current-graph-type">Force-Directed</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Last Updated:</div>
+                                    <div class="info-value" id="graph-updated">Never</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="footer">
+            <p>EPCIS Knowledge Graph © 2024 | Built with Rust & Axum</p>
+        </footer>
+    </div>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Main.js Function Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .console { background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px; height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Main.js Function Test</h1>
+    
+    <div class="test">
+        <h3>Test DOM Elements (should exist in main.js)</h3>
+        <div id="total-triples" class="result">Testing total-triples element</div>
+        <div id="query-results" class="result">Testing query-results element</div>
+        <div id="ontology-list" class="result">Testing ontology-list element</div>
+        <div id="system-metrics" class="result">Testing system-metrics element</div>
+    </div>
+    
+    <div class="test">
+        <h3>Test Results</h3>
+        <div id="test-output"></div>
+    </div>
+    
+    <div class="test">
+        <h3>Console Output</h3>
+        <div id="console" class="console"></div>
+    </div>
+    
+    <!-- Load the actual main.js file -->
+    <script src="/static/js/main.js"></script>
+    
+    <script>
+        // Override console.log to capture output
+        const originalLog = console.log;
+        console.log = function(...args) {
+            const consoleDiv = document.getElementById('console');
+            const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ');
+            consoleDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            originalLog.apply(console, args);
+        };
+        
+        // Test if main.js functions are available
+        function testMainJsFunctions() {
+            const output = document.getElementById('test-output');
+            let results = [];
+            
+            console.log('=== TESTING MAIN.JS FUNCTIONS ===');
+            
+            // Test if AppState exists
+            if (typeof AppState !== 'undefined') {
+                console.log('✅ AppState is available');
+                results.push('<div class="result success">AppState is available</div>');
+            } else {
+                console.log('❌ AppState is not available');
+                results.push('<div class="result error">AppState is not available</div>');
+            }
+            
+            // Test if key functions exist
+            const functionsToTest = [
+                'initializeApp',
+                'loadDashboardData',
+                'executeQuery',
+                'loadOntologyData',
+                'displayQueryResults',
+                'formatSparqlResults',
+                'updateMetricsDisplay',
+                'updateOntologyDisplay'
+            ];
+            
+            functionsToTest.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    console.log(`✅ ${funcName} is available`);
+                    results.push(`<div class="result success">${funcName} is available</div>`);
+                } else {
+                    console.log(`❌ ${funcName} is not available`);
+                    results.push(`<div class="result error">${funcName} is not available</div>`);
+                }
+            });
+            
+            // Test DOM elements
+            console.log('=== TESTING DOM ELEMENTS ===');
+            const domElements = ['total-triples', 'query-results', 'ontology-list'];
+            domElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    console.log(`✅ DOM element '${elementId}' found`);
+                    results.push(`<div class="result success">DOM element '${elementId}' found</div>`);
+                } else {
+                    console.log(`❌ DOM element '${elementId}' NOT found`);
+                    results.push(`<div class="result error">DOM element '${elementId}' NOT found</div>`);
+                }
+            });
+            
+            // Test if we can manually call functions
+            console.log('=== TESTING MANUAL FUNCTION CALLS ===');
+            
+            if (typeof updateMetricsDisplay === 'function') {
+                try {
+                    updateMetricsDisplay({
+                        total_triples: 776,
+                        query_rate: 5,
+                        memory_usage_mb: 512,
+                        active_connections: 1
+                    });
+                    console.log('✅ updateMetricsDisplay executed successfully');
+                    results.push('<div class="result success">updateMetricsDisplay executed successfully</div>');
+                } catch (error) {
+                    console.log('❌ updateMetricsDisplay failed:', error.message);
+                    results.push(`<div class="result error">updateMetricsDisplay failed: ${error.message}</div>`);
+                }
+            }
+            
+            if (typeof updateOntologyDisplay === 'function') {
+                try {
+                    updateOntologyDisplay([
+                        { name: 'epcis2.ttl', triples: 450, loaded: true },
+                        { name: 'cbv.ttl', triples: 326, loaded: true }
+                    ]);
+                    console.log('✅ updateOntologyDisplay executed successfully');
+                    results.push('<div class="result success">updateOntologyDisplay executed successfully</div>');
+                } catch (error) {
+                    console.log('❌ updateOntologyDisplay failed:', error.message);
+                    results.push(`<div class="result error">updateOntologyDisplay failed: ${error.message}</div>`);
+                }
+            }
+            
+            if (typeof displayQueryResults === 'function') {
+                try {
+                    const mockData = {
+                        status: 'success',
+                        head: { vars: ['s', 'p', 'o'] },
+                        results: {
+                            bindings: [
+                                {
+                                    s: { type: 'uri', value: 'ex:resource1' },
+                                    p: { type: 'uri', value: 'ex:hasProperty' },
+                                    o: { type: 'literal', value: 'test' }
+                                }
+                            ]
+                        }
+                    };
+                    displayQueryResults(mockData);
+                    console.log('✅ displayQueryResults executed successfully');
+                    results.push('<div class="result success">displayQueryResults executed successfully</div>');
+                } catch (error) {
+                    console.log('❌ displayQueryResults failed:', error.message);
+                    results.push(`<div class="result error">displayQueryResults failed: ${error.message}</div>`);
+                }
+            }
+            
+            output.innerHTML = results.join('');
+        }
+        
+        // Wait for main.js to load and then test
+        setTimeout(() => {
+            console.log('Main.js should be loaded now, starting tests...');
+            testMainJsFunctions();
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -367,19 +367,38 @@ async fn main() -> Result<(), EpcisKgError> {
             );
             
             // Initialize the store
-            let store = OxigraphStore::new(&final_db_path)?;
+            let mut store = OxigraphStore::new(&final_db_path)?;
             
             // Load sample data if requested
             if use_samples_data {
                 info!("Loading sample data with scale: {}", samples_scale);
-                match load_sample_data(&samples_scale, &final_db_path, false) {
-                    Ok(count) => {
-                        println!("✓ Loaded {} triples of sample data", count);
-                    },
-                    Err(e) => {
-                        eprintln!("⚠️  Failed to load sample data: {}", e);
-                        eprintln!("⚠️  Continuing with empty database...");
+                
+                // Determine sample file path based on scale
+                let sample_file = match samples_scale.to_lowercase().as_str() {
+                    "small" => "samples/epcis_data_small.ttl",
+                    "medium" => "samples/epcis_data_medium.ttl",
+                    "large" => "samples/epcis_data_large.ttl",
+                    "xlarge" => "samples/epcis_data_xlarge.ttl",
+                    _ => "samples/epcis_data_medium.ttl",
+                };
+                
+                // Check if sample file exists
+                if std::path::Path::new(sample_file).exists() {
+                    // Load the sample data directly into the existing store
+                    let loader = OntologyLoader::new();
+                    match loader.load_ontology(sample_file) {
+                        Ok(ontology_data) => {
+                            store.store_ontology_data(&ontology_data)?;
+                            println!("✓ Loaded {} triples of sample data", ontology_data.triples_count);
+                        },
+                        Err(e) => {
+                            eprintln!("⚠️  Failed to load sample data: {}", e);
+                            eprintln!("⚠️  Continuing with empty database...");
+                        }
                     }
+                } else {
+                    eprintln!("⚠️  Sample file not found: {}", sample_file);
+                    eprintln!("⚠️  Run 'cargo run -- generate --scale {} --output-path samples/' first.", samples_scale);
                 }
             }
             
@@ -1833,7 +1852,32 @@ fn load_sample_data(scale: &str, db_path: &str, force: bool) -> Result<usize, Ep
     }
     
     // Load the sample data
-    load_generated_data(sample_file, db_path)
+    load_sample_file_data(sample_file)
+}
+
+/// Load sample file data and return ontology data (without creating a new store)
+fn load_sample_file_data(file_path: &str) -> Result<usize, EpcisKgError> {
+    info!("Loading sample data from {}", file_path);
+    
+    // Check if file exists
+    if !std::path::Path::new(file_path).exists() {
+        return Err(EpcisKgError::Io(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("File not found: {}", file_path),
+        )));
+    }
+    
+    // Load the ontology data using the loader
+    let loader = OntologyLoader::new();
+    match loader.load_ontology(file_path) {
+        Ok(ontology_data) => {
+            println!("✓ Successfully loaded {} triples from {}", ontology_data.triples_count, file_path);
+            Ok(ontology_data.triples_count)
+        },
+        Err(e) => {
+            Err(EpcisKgError::Storage(format!("Failed to load data from {}: {}", file_path, e)))
+        }
+    }
 }
 
 /// Load generated data into the knowledge graph

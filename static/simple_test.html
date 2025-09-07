@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Main.js Test</title>
+</head>
+<body>
+    <h1>Simple Main.js Test</h1>
+    <p>If main.js loads correctly, you should see console messages and the total-triples element should update.</p>
+    
+    <!-- Required DOM elements for main.js -->
+    <div class="nav-links">
+        <a href="#" class="nav-link" data-page="dashboard">Dashboard</a>
+        <a href="#" class="nav-link" data-page="query">Query</a>
+    </div>
+    
+    <div class="page active" id="dashboard-page">
+        <div class="metric-value" id="total-triples">-</div>
+        <div class="query-results" id="query-results">Query results will appear here...</div>
+        <div class="ontology-list" id="ontology-list">Ontologies will appear here...</div>
+    </div>
+    
+    <div class="page" id="query-page">
+        <textarea id="sparql-query" rows="4" style="width: 100%;">SELECT * WHERE { ?s ?p ?o } LIMIT 5</textarea>
+        <button id="execute-query-btn">Execute</button>
+        <button id="clear-query-btn">Clear</button>
+        <div id="query-results"></div>
+    </div>
+    
+    <script>
+        console.log('=== BEFORE LOADING MAIN.JS ===');
+        console.log('DOM elements should exist:');
+        console.log('- total-triples:', document.getElementById('total-triples') ? 'YES' : 'NO');
+        console.log('- query-results:', document.getElementById('query-results') ? 'YES' : 'NO');
+        console.log('- ontology-list:', document.getElementById('ontology-list') ? 'YES' : 'NO');
+        console.log('- sparql-query:', document.getElementById('sparql-query') ? 'YES' : 'NO');
+        console.log('- execute-query-btn:', document.getElementById('execute-query-btn') ? 'YES' : 'NO');
+    </script>
+    
+    <!-- Load the actual main.js -->
+    <script src="/static/js/main.js"></script>
+    
+    <script>
+        console.log('=== AFTER LOADING MAIN.JS ===');
+        console.log('Checking if main.js functions are available:');
+        
+        // Check if AppState exists
+        console.log('AppState:', typeof AppState !== 'undefined' ? 'AVAILABLE' : 'NOT AVAILABLE');
+        
+        // Check if key functions exist
+        const functions = ['initializeApp', 'loadDashboardData', 'executeQuery', 'updateMetricsDisplay'];
+        functions.forEach(func => {
+            console.log(`${func}:`, typeof window[func] === 'function' ? 'AVAILABLE' : 'NOT AVAILABLE');
+        });
+        
+        // Try to manually initialize if not already done
+        if (typeof initializeApp === 'function') {
+            console.log('Attempting to manually call initializeApp...');
+            try {
+                initializeApp();
+                console.log('✅ initializeApp executed successfully');
+            } catch (error) {
+                console.error('❌ initializeApp failed:', error);
+            }
+        } else {
+            console.log('❌ initializeApp function not available');
+        }
+        
+        // Test individual functions
+        setTimeout(() => {
+            console.log('=== TESTING INDIVIDUAL FUNCTIONS ===');
+            
+            if (typeof updateMetricsDisplay === 'function') {
+                try {
+                    updateMetricsDisplay({
+                        total_triples: 999,
+                        query_rate: 10,
+                        memory_usage_mb: 256,
+                        active_connections: 5
+                    });
+                    console.log('✅ updateMetricsDisplay worked - check if total-triples element shows 999');
+                } catch (error) {
+                    console.error('❌ updateMetricsDisplay failed:', error);
+                }
+            }
+            
+            if (typeof loadOntologyData === 'function') {
+                console.log('Testing loadOntologyData...');
+                loadOntologyData().then(() => {
+                    console.log('✅ loadOntologyData completed');
+                }).catch(error => {
+                    console.error('❌ loadOntologyData failed:', error);
+                });
+            }
+            
+            if (typeof executeQuery === 'function') {
+                console.log('Testing executeQuery...');
+                // Set a query first
+                const queryElement = document.getElementById('sparql-query');
+                if (queryElement) {
+                    queryElement.value = 'SELECT * WHERE { ?s ?p ?o } LIMIT 3';
+                    try {
+                        executeQuery();
+                        console.log('✅ executeQuery called successfully');
+                    } catch (error) {
+                        console.error('❌ executeQuery failed:', error);
+                    }
+                } else {
+                    console.log('❌ sparql-query element not found');
+                }
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

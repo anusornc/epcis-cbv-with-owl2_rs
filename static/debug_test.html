@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPCIS KG Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 2px solid #ddd; border-radius: 8px; }
+        .result { margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 4px solid; }
+        .success { background: #d4edda; border-color: #28a745; color: #155724; }
+        .error { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .loading { background: #fff3cd; border-color: #ffc107; color: #856404; }
+        .console { background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; margin: 10px 0; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .data-display { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; }
+        h1, h2, h3 { color: #333; }
+        .api-test { margin: 15px 0; padding: 15px; background: #e9ecef; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 EPCIS Knowledge Graph - Comprehensive Debug Test</h1>
+        <p>This page will test ALL frontend functionality and identify exactly what's broken.</p>
+        
+        <div class="test-section">
+            <h2>🧪 API Endpoint Tests</h2>
+            <button onclick="testAllAPIs()">Test All APIs</button>
+            <button onclick="clearResults()">Clear Results</button>
+            
+            <div id="api-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 Dashboard Components Test</h2>
+            <button onclick="testDashboardComponents()">Test Dashboard Components</button>
+            <div id="dashboard-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 SPARQL Query Test</h2>
+            <div class="api-test">
+                <h4>Query Editor Test</h4>
+                <textarea id="query-input" rows="4" style="width: 100%; font-family: monospace;" placeholder="Enter SPARQL query...">SELECT * WHERE { ?s ?p ?o } LIMIT 5</textarea>
+                <br><br>
+                <button onclick="testSparqlQuery()">Execute Query</button>
+                <div id="sparql-results"></div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📚 Ontology Management Test</h2>
+            <button onclick="testOntologyManagement()">Test Ontology Loading</button>
+            <div id="ontology-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📈 Monitoring Dashboard Test</h2>
+            <button onclick="testMonitoringDashboard()">Test Monitoring Components</button>
+            <div id="monitoring-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🕸️ Knowledge Graph Visualization Test</h2>
+            <button onclick="testVisualization()">Test Visualization Components</button>
+            <div id="visualization-results"></div>
+            <div id="viz-container" style="width: 100%; height: 400px; border: 1px solid #ddd; margin: 10px 0;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>💻 Console Output</h2>
+            <div id="console-output" class="console">Console messages will appear here...</div>
+            <button onclick="clearConsole()">Clear Console</button>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api/v1';
+        let testResults = {};
+        
+        function log(message) {
+            const consoleOutput = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            consoleOutput.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = 'Console cleared...';
+        }
+        
+        function updateResult(elementId, className, message) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${className}">${message}</div>`;
+        }
+        
+        function showData(elementId, data, title) {
+            const element = document.getElementById(elementId);
+            const dataStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+            element.innerHTML = `
+                <h4>${title}</h4>
+                <div class="data-display">${dataStr}</div>
+            `;
+        }
+        
+        // Test all API endpoints
+        async function testAllAPIs() {
+            log('Starting comprehensive API tests...');
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<h3>API Test Results</h3>';
+            
+            const apis = [
+                { name: 'Statistics', url: '/statistics', method: 'GET' },
+                { name: 'Ontologies', url: '/ontologies', method: 'GET' },
+                { name: 'SPARQL Query', url: '/sparql/query', method: 'POST', 
+                  body: { query: 'SELECT * WHERE { ?s ?p ?o } LIMIT 3', default_graph_uri: null, named_graph_uri: null } },
+                { name: 'Monitoring Health', url: '/monitoring/health', method: 'GET' },
+                { name: 'Monitoring Alerts', url: '/monitoring/alerts', method: 'GET' },
+                { name: 'Monitoring Metrics', url: '/monitoring/metrics', method: 'GET' }
+            ];
+            
+            for (const api of apis) {
+                log(`Testing ${api.name} API...`);
+                try {
+                    const options = {
+                        method: api.method,
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+                    
+                    if (api.body) {
+                        options.body = JSON.stringify(api.body);
+                    }
+                    
+                    const response = await fetch(`${API_BASE}${api.url}`, options);
+                    const data = await response.json();
+                    
+                    log(`${api.name} API: ${response.status} - Success`);
+                    resultsDiv.innerHTML += `
+                        <div class="api-test">
+                            <h4>${api.name} API - ✅ SUCCESS (${response.status})</h4>
+                            <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                            <div class="data-display">${JSON.stringify(data, null, 2)}</div>
+                        </div>
+                    `;
+                    
+                    testResults[api.name.toLowerCase().replace(' ', '_')] = { success: true, data, status: response.status };
+                    
+                } catch (error) {
+                    log(`${api.name} API: FAILED - ${error.message}`);
+                    resultsDiv.innerHTML += `
+                        <div class="api-test">
+                            <h4>${api.name} API - ❌ FAILED</h4>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                        </div>
+                    `;
+                    testResults[api.name.toLowerCase().replace(' ', '_')] = { success: false, error: error.message };
+                }
+            }
+            
+            log('API tests completed');
+        }
+        
+        // Test dashboard components
+        async function testDashboardComponents() {
+            log('Testing dashboard components...');
+            const resultsDiv = document.getElementById('dashboard-results');
+            resultsDiv.innerHTML = '<h3>Dashboard Components Test</h3>';
+            
+            try {
+                // Test statistics API (main dashboard data source)
+                const response = await fetch(`${API_BASE}/statistics`);
+                const data = await response.json();
+                
+                log(`Statistics API response: ${JSON.stringify(data)}`);
+                
+                // Check if data has expected fields
+                const hasTotalTriples = data.total_triples !== undefined;
+                const hasStatus = data.status !== undefined;
+                
+                resultsDiv.innerHTML += `
+                    <div class="result ${hasTotalTriples && hasStatus ? 'success' : 'error'}">
+                        <h4>Statistics Data Test</h4>
+                        <p><strong>Total Triples:</strong> ${data.total_triples || 'MISSING'}</p>
+                        <p><strong>Status:</strong> ${data.status || 'MISSING'}</p>
+                        <p><strong>Named Graphs:</strong> ${data.named_graphs || 'MISSING'}</p>
+                        <p><strong>Reasoning Enabled:</strong> ${data.reasoning_enabled || 'MISSING'}</p>
+                    </div>
+                `;
+                
+                // Test DOM elements that would be updated
+                const mockDashboard = {
+                    'total-triples': data.total_triples || 0,
+                    'query-rate': 0,
+                    'memory-usage': `${data.memory_usage_mb || 0} MB`,
+                    'active-connections': data.active_connections || 1
+                };
+                
+                resultsDiv.innerHTML += `
+                    <div class="api-test">
+                        <h4>Dashboard Update Simulation</h4>
+                        <p><strong>Would update DOM elements:</strong></p>
+                        <div class="data-display">${JSON.stringify(mockDashboard, null, 2)}</div>
+                    </div>
+                `;
+                
+                testResults.dashboard = { success: hasTotalTriples && hasStatus, data };
+                
+            } catch (error) {
+                log(`Dashboard test failed: ${error.message}`);
+                resultsDiv.innerHTML += `<div class="result error">Dashboard test failed: ${error.message}</div>`;
+                testResults.dashboard = { success: false, error: error.message };
+            }
+        }
+        
+        // Test SPARQL query functionality
+        async function testSparqlQuery() {
+            const queryInput = document.getElementById('query-input');
+            const query = queryInput.value.trim();
+            const resultsDiv = document.getElementById('sparql-results');
+            
+            if (!query) {
+                resultsDiv.innerHTML = '<div class="result error">No query provided</div>';
+                return;
+            }
+            
+            log(`Testing SPARQL query: ${query}`);
+            resultsDiv.innerHTML = '<div class="result loading">Testing SPARQL query...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/sparql/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: query,
+                        default_graph_uri: null,
+                        named_graph_uri: null
+                    })
+                });
+                
+                const data = await response.json();
+                log(`SPARQL response: ${JSON.stringify(data)}`);
+                
+                const resultCount = data.results && data.results.bindings ? data.results.bindings.length : 0;
+                
+                resultsDiv.innerHTML = `
+                    <div class="result ${response.ok ? 'success' : 'error'}">
+                        <h4>SPARQL Query Test</h4>
+                        <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                        <p><strong>Query:</strong> ${query}</p>
+                        <p><strong>Results:</strong> ${resultCount} bindings</p>
+                        <p><strong>Query Type:</strong> ${data.query_type || 'UNKNOWN'}</p>
+                        <p><strong>Execution Time:</strong> ${data.execution_time_ms || 0}ms</p>
+                    </div>
+                `;
+                
+                // Display actual results
+                if (data.results && data.results.bindings) {
+                    let tableHtml = '<table border="1" style="width: 100%; margin-top: 10px; border-collapse: collapse;">';
+                    tableHtml += '<thead style="background: #f8f9fa;"><tr>';
+                    
+                    if (data.results.bindings.length > 0) {
+                        const vars = Object.keys(data.results.bindings[0]);
+                        vars.forEach(v => {
+                            tableHtml += `<th style="padding: 8px; border: 1px solid #ddd;">${v}</th>`;
+                        });
+                        tableHtml += '</tr></thead><tbody>';
+                        
+                        data.results.bindings.forEach(binding => {
+                            tableHtml += '<tr>';
+                            vars.forEach(v => {
+                                const value = binding[v];
+                                if (value) {
+                                    tableHtml += `<td style="padding: 8px; border: 1px solid #ddd; font-size: 12px;">${value.value}</td>`;
+                                } else {
+                                    tableHtml += '<td style="padding: 8px; border: 1px solid #ddd;">-</td>';
+                                }
+                            });
+                            tableHtml += '</tr>';
+                        });
+                    }
+                    
+                    tableHtml += '</tbody></table>';
+                    resultsDiv.innerHTML += `<div class="data-display">${tableHtml}</div>`;
+                }
+                
+                testResults.sparql = { success: response.ok, data, resultCount };
+                
+            } catch (error) {
+                log(`SPARQL test failed: ${error.message}`);
+                resultsDiv.innerHTML = `<div class="result error">SPARQL test failed: ${error.message}</div>`;
+                testResults.sparql = { success: false, error: error.message };
+            }
+        }
+        
+        // Test ontology management
+        async function testOntologyManagement() {
+            log('Testing ontology management...');
+            const resultsDiv = document.getElementById('ontology-results');
+            resultsDiv.innerHTML = '<h3>Ontology Management Test</h3>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/ontologies`);
+                const data = await response.json();
+                
+                log(`Ontology response: ${JSON.stringify(data)}`);
+                
+                const hasOntologies = data.ontologies && Array.isArray(data.ontologies);
+                const ontologyCount = hasOntologies ? data.ontologies.length : 0;
+                
+                resultsDiv.innerHTML += `
+                    <div class="result ${hasOntologies ? 'success' : 'error'}">
+                        <h4>Ontology Data Test</h4>
+                        <p><strong>Ontologies Found:</strong> ${ontologyCount}</p>
+                        <p><strong>Total Triples:</strong> ${data.total_triples || 'MISSING'}</p>
+                        <p><strong>Loaded Graphs:</strong> ${data.loaded_graphs || 'MISSING'}</p>
+                        <p><strong>Status:</strong> ${data.status || 'MISSING'}</p>
+                    </div>
+                `;
+                
+                if (hasOntologies) {
+                    let ontologiesHtml = '<h4>Loaded Ontologies:</h4><ul>';
+                    data.ontologies.forEach(ont => {
+                        ontologiesHtml += `<li><strong>${ont.name}:</strong> ${ont.triples} triples (${ont.loaded ? 'Loaded' : 'Not loaded'})</li>`;
+                    });
+                    ontologiesHtml += '</ul>';
+                    resultsDiv.innerHTML += `<div class="api-test">${ontologiesHtml}</div>`;
+                }
+                
+                testResults.ontology = { success: hasOntologies, data, ontologyCount };
+                
+            } catch (error) {
+                log(`Ontology test failed: ${error.message}`);
+                resultsDiv.innerHTML += `<div class="result error">Ontology test failed: ${error.message}</div>`;
+                testResults.ontology = { success: false, error: error.message };
+            }
+        }
+        
+        // Test monitoring dashboard
+        async function testMonitoringDashboard() {
+            log('Testing monitoring dashboard...');
+            const resultsDiv = document.getElementById('monitoring-results');
+            resultsDiv.innerHTML = '<h3>Monitoring Dashboard Test</h3>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/monitoring/health`);
+                const data = await response.json();
+                
+                log(`Monitoring response: ${JSON.stringify(data)}`);
+                
+                const hasCpu = data.cpu_usage_percent !== undefined;
+                const hasMemory = data.memory_usage_mb !== undefined;
+                const hasStatus = data.status !== undefined;
+                
+                resultsDiv.innerHTML += `
+                    <div class="result ${hasCpu && hasMemory && hasStatus ? 'success' : 'error'}">
+                        <h4>Monitoring Data Test</h4>
+                        <p><strong>Status:</strong> ${data.status || 'MISSING'}</p>
+                        <p><strong>CPU Usage:</strong> ${data.cpu_usage_percent || 'MISSING'}%</p>
+                        <p><strong>Memory Usage:</strong> ${data.memory_usage_mb || 'MISSING'} MB</p>
+                        <p><strong>Active Connections:</strong> ${data.active_connections || 'MISSING'}</p>
+                        <p><strong>Uptime:</strong> ${data.uptime_seconds || 'MISSING'} seconds</p>
+                    </div>
+                `;
+                
+                testResults.monitoring = { success: hasCpu && hasMemory && hasStatus, data };
+                
+            } catch (error) {
+                log(`Monitoring test failed: ${error.message}`);
+                resultsDiv.innerHTML += `<div class="result error">Monitoring test failed: ${error.message}</div>`;
+                testResults.monitoring = { success: false, error: error.message };
+            }
+        }
+        
+        // Test visualization components
+        async function testVisualization() {
+            log('Testing visualization components...');
+            const resultsDiv = document.getElementById('visualization-results');
+            resultsDiv.innerHTML = '<h3>Visualization Test</h3>';
+            
+            try {
+                // Test if D3.js is available
+                if (typeof d3 === 'undefined') {
+                    throw new Error('D3.js is not loaded');
+                }
+                
+                log('D3.js is available');
+                
+                // Test if we can create SVG elements
+                const container = document.getElementById('viz-container');
+                container.innerHTML = '';
+                
+                const svg = d3.select('#viz-container')
+                    .append('svg')
+                    .attr('width', '100%')
+                    .attr('height', '100%');
+                
+                // Create sample nodes for testing
+                const sampleData = {
+                    nodes: [
+                        { id: 'node1', name: 'Product 1', type: 'product' },
+                        { id: 'node2', name: 'Location 1', type: 'location' },
+                        { id: 'node3', name: 'Event 1', type: 'event' }
+                    ],
+                    edges: [
+                        { source: 'node1', target: 'node2', type: 'located_at' },
+                        { source: 'node1', target: 'node3', type: 'involved_in' }
+                    ]
+                };
+                
+                // Create a simple force simulation
+                const simulation = d3.forceSimulation(sampleData.nodes)
+                    .force('link', d3.forceLink(sampleData.edges).id(d => d.id).distance(100))
+                    .force('charge', d3.forceManyBody().strength(-300))
+                    .force('center', d3.forceCenter(400, 200));
+                
+                // Create links
+                const link = svg.append('g')
+                    .selectAll('line')
+                    .data(sampleData.edges)
+                    .enter().append('line')
+                    .style('stroke', '#999')
+                    .style('stroke-opacity', 0.6)
+                    .style('stroke-width', 2);
+                
+                // Create nodes
+                const node = svg.append('g')
+                    .selectAll('circle')
+                    .data(sampleData.nodes)
+                    .enter().append('circle')
+                    .attr('r', 10)
+                    .style('fill', d => d.type === 'product' ? '#ff7f0e' : d.type === 'location' ? '#2ca02c' : '#d62728')
+                    .style('stroke', '#fff')
+                    .style('stroke-width', 2);
+                
+                // Create labels
+                const label = svg.append('g')
+                    .selectAll('text')
+                    .data(sampleData.nodes)
+                    .enter().append('text')
+                    .text(d => d.name)
+                    .style('font-size', '12px')
+                    .style('text-anchor', 'middle')
+                    .attr('dy', 25);
+                
+                // Update positions on tick
+                simulation.on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+                    
+                    node
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => d.y);
+                    
+                    label
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y);
+                });
+                
+                resultsDiv.innerHTML += `
+                    <div class="result success">
+                        <h4>Visualization Test</h4>
+                        <p><strong>D3.js:</strong> ✅ Available</p>
+                        <p><strong>SVG Creation:</strong> ✅ Success</p>
+                        <p><strong>Force Simulation:</strong> ✅ Running</p>
+                        <p><strong>Sample Nodes:</strong> ${sampleData.nodes.length}</p>
+                        <p><strong>Sample Edges:</strong> ${sampleData.edges.length}</p>
+                    </div>
+                `;
+                
+                testResults.visualization = { success: true, data: sampleData };
+                
+            } catch (error) {
+                log(`Visualization test failed: ${error.message}`);
+                resultsDiv.innerHTML += `<div class="result error">Visualization test failed: ${error.message}</div>`;
+                testResults.visualization = { success: false, error: error.message };
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('api-results').innerHTML = '';
+            document.getElementById('dashboard-results').innerHTML = '';
+            document.getElementById('sparql-results').innerHTML = '';
+            document.getElementById('ontology-results').innerHTML = '';
+            document.getElementById('monitoring-results').innerHTML = '';
+            document.getElementById('visualization-results').innerHTML = '';
+        }
+        
+        // Initialize and run automatic tests
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Debug page loaded. Ready for testing.');
+            log('API Base URL: ' + API_BASE);
+            
+            // Check if D3.js is loaded
+            if (typeof d3 !== 'undefined') {
+                log('D3.js is loaded');
+            } else {
+                log('WARNING: D3.js is not loaded - visualization will not work');
+            }
+            
+            // Run automatic tests after a short delay
+            setTimeout(() => {
+                log('Running automatic API tests...');
+                testAllAPIs();
+            }, 1000);
+        });
+    </script>
+    
+    <!-- Load D3.js for visualization testing -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</body>
+</html>

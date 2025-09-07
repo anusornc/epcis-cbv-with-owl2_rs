@@ -43,9 +43,22 @@ impl OxigraphStore {
         
         // Convert the ontology graph to our internal format
         let mut graph = OxrdfGraph::default();
+        let mut triple_count = 0;
+        
+        println!("🔍 DEBUG: Storing {} triples from {}", ontology_data.triples_count, ontology_data.source_file);
+        
         for triple in ontology_data.graph.iter() {
             graph.insert(triple);
+            triple_count += 1;
+            
+            // Print first few triples for debugging
+            if triple_count <= 5 {
+                println!("🔍 DEBUG: Triple {}: {} -> {} -> {}", 
+                    triple_count, triple.subject, triple.predicate, triple.object);
+            }
         }
+        
+        println!("🔍 DEBUG: Total triples stored: {}", triple_count);
         
         // Store the graph
         self.graphs.insert(graph_name, graph);
@@ -57,10 +70,118 @@ impl OxigraphStore {
     }
     
     /// Store ontology data from Turtle format string
-    pub fn store_ontology_turtle(&mut self, _turtle_data: &str, graph_name: &str) -> Result<(), EpcisKgError> {
-        // For now, we'll skip Turtle parsing and just store empty graphs
-        // In a real implementation, you'd use a proper Turtle parser
-        let graph = OxrdfGraph::default();
+    pub fn store_ontology_turtle(&mut self, turtle_data: &str, graph_name: &str) -> Result<(), EpcisKgError> {
+        let mut graph = OxrdfGraph::default();
+        
+        // Parse prefixes from Turtle data
+        let mut prefixes = std::collections::HashMap::new();
+        let mut triple_count = 0;
+        
+        // Simple Turtle parser - extract real triples
+        for line in turtle_data.lines() {
+            let trimmed = line.trim();
+            
+            // Skip empty lines and comments
+            if trimmed.is_empty() || trimmed.starts_with('#') {
+                continue;
+            }
+            
+            // Parse prefix declarations
+            if trimmed.starts_with("@prefix") {
+                if let Some(prefix_part) = trimmed.strip_prefix("@prefix") {
+                    let parts: Vec<&str> = prefix_part.split(':').collect();
+                    if parts.len() >= 2 {
+                        let prefix_name = parts[0].trim();
+                        let uri_part = parts[1].trim();
+                        if let Some(uri) = uri_part.strip_suffix('.').and_then(|s| s.strip_prefix('<')).and_then(|s| s.strip_suffix('>')) {
+                            prefixes.insert(prefix_name, uri.to_string());
+                        }
+                    }
+                }
+                continue;
+            }
+            
+            // Parse triples (simplified Turtle parsing)
+            if trimmed.contains(' ') && !trimmed.starts_with('@') {
+                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                if parts.len() >= 3 {
+                    let subject_str = parts[0];
+                    let predicate_str = parts[1];
+                    let mut object_str = parts[2];
+                    
+                    // Remove trailing dot from object if present
+                    if object_str.ends_with('.') {
+                        object_str = &object_str[0..object_str.len()-1];
+                    }
+                    
+                    // Convert subject
+                    let subject = if subject_str.starts_with('<') && subject_str.ends_with('>') {
+                        let uri = &subject_str[1..subject_str.len()-1];
+                        oxrdf::NamedNode::new_unchecked(uri)
+                    } else if subject_str.contains(':') {
+                        // Handle prefixed names
+                        let mut expanded = subject_str.to_string();
+                        for (prefix, uri) in &prefixes {
+                            if subject_str.starts_with(&format!("{}:", prefix)) {
+                                expanded = subject_str.replace(&format!("{}:", prefix), uri);
+                                break;
+                            }
+                        }
+                        oxrdf::NamedNode::new_unchecked(expanded)
+                    } else {
+                        continue; // Skip invalid subjects
+                    };
+                    
+                    // Convert predicate
+                    let predicate = if predicate_str.starts_with('<') && predicate_str.ends_with('>') {
+                        let uri = &predicate_str[1..predicate_str.len()-1];
+                        oxrdf::NamedNode::new_unchecked(uri)
+                    } else if predicate_str.contains(':') {
+                        let mut expanded = predicate_str.to_string();
+                        for (prefix, uri) in &prefixes {
+                            if predicate_str.starts_with(&format!("{}:", prefix)) {
+                                expanded = predicate_str.replace(&format!("{}:", prefix), uri);
+                                break;
+                            }
+                        }
+                        oxrdf::NamedNode::new_unchecked(expanded)
+                    } else {
+                        continue; // Skip invalid predicates
+                    };
+                    
+                    // Convert object
+                    let object = if object_str.starts_with('<') && object_str.ends_with('>') {
+                        let uri = &object_str[1..object_str.len()-1];
+                        oxrdf::Term::NamedNode(oxrdf::NamedNode::new_unchecked(uri))
+                    } else if object_str.starts_with('"') && object_str.ends_with('"') {
+                        // Literal
+                        let literal_content = &object_str[1..object_str.len()-1];
+                        oxrdf::Term::Literal(oxrdf::Literal::new_simple_literal(literal_content))
+                    } else if object_str.contains(':') {
+                        // Prefixed name or URI
+                        let mut expanded = object_str.to_string();
+                        for (prefix, uri) in &prefixes {
+                            if object_str.starts_with(&format!("{}:", prefix)) {
+                                expanded = object_str.replace(&format!("{}:", prefix), uri);
+                                break;
+                            }
+                        }
+                        oxrdf::Term::NamedNode(oxrdf::NamedNode::new_unchecked(expanded))
+                    } else {
+                        continue; // Skip invalid objects
+                    };
+                    
+                    // Create and store the triple
+                    let triple = oxrdf::Triple::new(subject, predicate, object);
+                    graph.insert(triple.as_ref());
+                    triple_count += 1;
+                }
+            }
+        }
+        
+        println!("✓ Parsed and stored {} real triples from Turtle data for graph: {}", triple_count, graph_name);
+        
+        // Store the graph
         self.graphs.insert(graph_name.to_string(), graph);
         
         Ok(())
@@ -68,19 +189,30 @@ impl OxigraphStore {
     
     /// Execute SPARQL SELECT query and return results as JSON
     pub fn query_select(&self, sparql_query: &str) -> Result<String, EpcisKgError> {
+        println!("🔍 DEBUG: Executing SPARQL query: {}", sparql_query);
+        println!("🔍 DEBUG: Available graphs: {}", self.graphs.len());
+        
         // For now, implement a very basic SELECT query handler
         // This is a simplified implementation that handles basic patterns
         
         if sparql_query.contains("SELECT") && sparql_query.contains("WHERE") {
             // Extract the basic pattern (very simplified)
             let variables = self.get_query_variables(sparql_query)?;
+            println!("🔍 DEBUG: Query variables: {:?}", variables);
+            
+            // Parse LIMIT clause if present
+            let limit = self.parse_limit_clause(sparql_query)?;
+            println!("🔍 DEBUG: Query LIMIT: {}", limit);
             
             // For demonstration, return some basic results
             let mut json_results = Vec::new();
+            let mut total_triples = 0;
             
             // Collect all triples from all graphs
             for (graph_name, graph) in &self.graphs {
+                println!("🔍 DEBUG: Graph '{}' has {} triples", graph_name, graph.len());
                 for triple in graph.iter() {
+                    total_triples += 1;
                     let mut solution_map = serde_json::Map::new();
                     
                     // Add variables based on what was requested
@@ -118,6 +250,16 @@ impl OxigraphStore {
                     if !solution_map.is_empty() {
                         json_results.push(solution_map);
                     }
+                    
+                    // Apply limit if specified
+                    if limit > 0 && json_results.len() >= limit {
+                        break;
+                    }
+                }
+                
+                // Apply limit if specified (break out of graph loop)
+                if limit > 0 && json_results.len() >= limit {
+                    break;
                 }
             }
             
@@ -200,7 +342,7 @@ impl OxigraphStore {
         
         // Add all triples to the graph
         for triple in triples {
-            graph.insert(triple);
+            graph.insert(triple.as_ref());
         }
         
         // Store the graph
@@ -241,6 +383,25 @@ impl OxigraphStore {
             .collect();
         
         Ok(vars)
+    }
+    
+    /// Parse LIMIT clause from SPARQL query string
+    fn parse_limit_clause(&self, query: &str) -> Result<usize, EpcisKgError> {
+        // Look for LIMIT clause in the query
+        let query_upper = query.to_uppercase();
+        if let Some(limit_pos) = query_upper.find("LIMIT") {
+            // Get the part after LIMIT
+            let after_limit = &query[limit_pos + 5..];
+            // Extract the number (simplified - just take the first sequence of digits)
+            let limit_str = after_limit.trim().split_whitespace().next().unwrap_or("0");
+            // Parse the number
+            limit_str.parse::<usize>().map_err(|_| {
+                EpcisKgError::Query(format!("Invalid LIMIT value: {}", limit_str))
+            })
+        } else {
+            // No LIMIT specified, return 0 (unlimited)
+            Ok(0)
+        }
     }
     
     /// Load graphs from persistent storage
@@ -296,12 +457,116 @@ impl OxigraphStore {
     }
     
     /// Parse Turtle content to Graph
-    fn parse_turtle_to_graph(_turtle_content: &str) -> Result<OxrdfGraph, EpcisKgError> {
-        let graph = OxrdfGraph::default();
+    fn parse_turtle_to_graph(turtle_content: &str) -> Result<OxrdfGraph, EpcisKgError> {
+        let mut graph = OxrdfGraph::default();
+        let mut triple_count = 0;
         
-        // For now, return empty graph since parsing complex Turtle syntax is non-trivial
-        // In production, you'd use a proper Turtle parser like oxttl
-        println!("Warning: Turtle persistence is simplified - returning empty graph");
+        // Parse prefixes from Turtle data
+        let mut prefixes = std::collections::HashMap::new();
+        
+        // Simple Turtle parser - extract real triples
+        for line in turtle_content.lines() {
+            let trimmed = line.trim();
+            
+            // Skip empty lines and comments
+            if trimmed.is_empty() || trimmed.starts_with('#') {
+                continue;
+            }
+            
+            // Parse prefix declarations
+            if trimmed.starts_with("@prefix") {
+                if let Some(prefix_part) = trimmed.strip_prefix("@prefix") {
+                    let parts: Vec<&str> = prefix_part.split(':').collect();
+                    if parts.len() >= 2 {
+                        let prefix_name = parts[0].trim();
+                        let uri_part = parts[1].trim();
+                        if let Some(uri) = uri_part.strip_suffix('.').and_then(|s| s.strip_prefix('<')).and_then(|s| s.strip_suffix('>')) {
+                            prefixes.insert(prefix_name, uri.to_string());
+                        }
+                    }
+                }
+                continue;
+            }
+            
+            // Parse triples (simplified Turtle parsing)
+            if trimmed.contains(' ') && !trimmed.starts_with('@') {
+                let parts: Vec<&str> = trimmed.split_whitespace().collect();
+                if parts.len() >= 3 {
+                    let subject_str = parts[0];
+                    let predicate_str = parts[1];
+                    let mut object_str = parts[2];
+                    
+                    // Remove trailing dot from object if present
+                    if object_str.ends_with('.') {
+                        object_str = &object_str[0..object_str.len()-1];
+                    }
+                    
+                    // Convert subject
+                    let subject = if subject_str.starts_with('<') && subject_str.ends_with('>') {
+                        let uri = &subject_str[1..subject_str.len()-1];
+                        oxrdf::NamedNode::new_unchecked(uri)
+                    } else if subject_str.contains(':') {
+                        // Handle prefixed names
+                        let mut expanded = subject_str.to_string();
+                        for (prefix, uri) in &prefixes {
+                            if subject_str.starts_with(&format!("{}:", prefix)) {
+                                expanded = subject_str.replace(&format!("{}:", prefix), uri);
+                                break;
+                            }
+                        }
+                        oxrdf::NamedNode::new_unchecked(expanded)
+                    } else {
+                        continue; // Skip invalid subjects
+                    };
+                    
+                    // Convert predicate
+                    let predicate = if predicate_str.starts_with('<') && predicate_str.ends_with('>') {
+                        let uri = &predicate_str[1..predicate_str.len()-1];
+                        oxrdf::NamedNode::new_unchecked(uri)
+                    } else if predicate_str.contains(':') {
+                        let mut expanded = predicate_str.to_string();
+                        for (prefix, uri) in &prefixes {
+                            if predicate_str.starts_with(&format!("{}:", prefix)) {
+                                expanded = predicate_str.replace(&format!("{}:", prefix), uri);
+                                break;
+                            }
+                        }
+                        oxrdf::NamedNode::new_unchecked(expanded)
+                    } else {
+                        continue; // Skip invalid predicates
+                    };
+                    
+                    // Convert object
+                    let object = if object_str.starts_with('<') && object_str.ends_with('>') {
+                        let uri = &object_str[1..object_str.len()-1];
+                        oxrdf::Term::NamedNode(oxrdf::NamedNode::new_unchecked(uri))
+                    } else if object_str.starts_with('"') && object_str.ends_with('"') {
+                        // Literal
+                        let literal_content = &object_str[1..object_str.len()-1];
+                        oxrdf::Term::Literal(oxrdf::Literal::new_simple_literal(literal_content))
+                    } else if object_str.contains(':') {
+                        // Prefixed name or URI
+                        let mut expanded = object_str.to_string();
+                        for (prefix, uri) in &prefixes {
+                            if object_str.starts_with(&format!("{}:", prefix)) {
+                                expanded = object_str.replace(&format!("{}:", prefix), uri);
+                                break;
+                            }
+                        }
+                        oxrdf::Term::NamedNode(oxrdf::NamedNode::new_unchecked(expanded))
+                    } else {
+                        continue; // Skip invalid objects
+                    };
+                    
+                    // Create and store the triple
+                    let triple = oxrdf::Triple::new(subject, predicate, object);
+                    graph.insert(triple.as_ref());
+                    triple_count += 1;
+                }
+            }
+        }
+        
+        println!("✓ Parsed and stored {} triples from persisted Turtle data", triple_count);
         
         Ok(graph)
     }

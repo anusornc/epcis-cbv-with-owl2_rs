@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Final Visualization Test</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .viz-container { width: 100%; height: 600px; border: 1px solid #ddd; margin: 20px 0; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 10px 0; }
+        .btn:hover { background: #0056b3; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Final Visualization Test</h1>
+        <p>This page tests the fixed visualization functionality that automatically loads real SPARQL data.</p>
+        
+        <button class="btn" onclick="loadVisualization()">Load Knowledge Graph</button>
+        
+        <div id="status"></div>
+        
+        <div class="viz-container" id="graph-container">
+            <p style="text-align: center; padding-top: 250px;">Click "Load Knowledge Graph" to visualize real data</p>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api/v1';
+        
+        async function loadVisualization() {
+            console.log('🚀 Loading visualization...');
+            const statusDiv = document.getElementById('status');
+            const containerDiv = document.getElementById('graph-container');
+            
+            statusDiv.innerHTML = '<div class="loading">🔄 Loading real knowledge graph data...</div>';
+            
+            try {
+                // Get real SPARQL data
+                const response = await fetch(`${API_BASE}/sparql/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: 'SELECT * WHERE { ?s ?p ?o } LIMIT 20',
+                        default_graph_uri: null,
+                        named_graph_uri: null
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ SPARQL data received:', data);
+                
+                if (!data.results || !data.results.bindings) {
+                    throw new Error('No data available for visualization');
+                }
+                
+                // Convert to graph format
+                const graphData = convertSparqlToGraph(data.results.bindings);
+                console.log('🎯 Graph data:', graphData);
+                
+                if (graphData.nodes.length === 0) {
+                    throw new Error('No nodes could be created from SPARQL data');
+                }
+                
+                // Create visualization
+                createKnowledgeGraphVisualization(containerDiv, graphData);
+                
+                statusDiv.innerHTML = `<div class="success">✅ Knowledge graph loaded successfully!</div>
+                                     <div>📊 ${graphData.nodes.length} nodes, ${graphData.links.length} relationships</div>
+                                     <div>🔍 Data source: Real SPARQL query results</div>`;
+                
+            } catch (error) {
+                console.error('❌ Visualization failed:', error);
+                statusDiv.innerHTML = `<div class="error">❌ Failed to load visualization: ${error.message}</div>`;
+            }
+        }
+        
+        function convertSparqlToGraph(bindings) {
+            const nodes = new Map();
+            const links = [];
+            
+            bindings.forEach(binding => {
+                const subject = binding.s?.value;
+                const predicate = binding.p?.value;
+                const object = binding.o?.value;
+                
+                if (subject && predicate && object) {
+                    if (!nodes.has(subject)) {
+                        nodes.set(subject, {
+                            id: subject,
+                            name: getNodeName(subject),
+                            type: getNodeType(subject),
+                            group: getNodeGroup(subject)
+                        });
+                    }
+                    
+                    if (!nodes.has(object)) {
+                        nodes.set(object, {
+                            id: object,
+                            name: getNodeName(object),
+                            type: getNodeType(object),
+                            group: getNodeGroup(object)
+                        });
+                    }
+                    
+                    links.push({
+                        source: subject,
+                        target: object,
+                        type: getEdgeType(predicate),
+                        label: getEdgeLabel(predicate)
+                    });
+                }
+            });
+            
+            return {
+                nodes: Array.from(nodes.values()),
+                links: links
+            };
+        }
+        
+        function getNodeName(uri) {
+            if (uri.startsWith('ex:')) {
+                return uri.replace('ex:', '').replace(/resource(\d+)/, 'Resource $1');
+            }
+            if (uri.includes('#')) return uri.split('#').pop();
+            if (uri.includes('/')) return uri.split('/').pop();
+            return uri.length > 30 ? uri.substring(0, 30) + '...' : uri;
+        }
+        
+        function getNodeType(uri) {
+            const uriLower = uri.toLowerCase();
+            if (uriLower.includes('product')) return 'product';
+            if (uriLower.includes('location')) return 'location';
+            if (uriLower.includes('event')) return 'event';
+            if (uriLower.includes('business')) return 'business';
+            return 'resource';
+        }
+        
+        function getNodeGroup(uri) {
+            const type = getNodeType(uri);
+            const groups = { product: 1, location: 2, event: 3, business: 4 };
+            return groups[type] || 0;
+        }
+        
+        function getEdgeType(predicate) {
+            const predLower = predicate.toLowerCase();
+            if (predLower.includes('type')) return 'type';
+            if (predLower.includes('has')) return 'has';
+            return 'relationship';
+        }
+        
+        function getEdgeLabel(predicate) {
+            if (predicate.includes('#')) return predicate.split('#').pop();
+            return predicate.length > 20 ? predicate.substring(0, 20) + '...' : predicate;
+        }
+        
+        function createKnowledgeGraphVisualization(container, data) {
+            container.innerHTML = '';
+            
+            const width = container.clientWidth;
+            const height = 600;
+            
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            // Zoom behavior
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+            
+            const g = svg.append('g');
+            
+            // Color scale
+            const color = d3.scaleOrdinal(d3.schemeCategory10);
+            
+            // Force simulation
+            const simulation = d3.forceSimulation(data.nodes)
+                .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-400))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(30));
+            
+            // Links
+            const link = g.append('g')
+                .selectAll('line')
+                .data(data.links)
+                .enter().append('line')
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.8)
+                .attr('stroke-width', 3);
+            
+            // Link labels
+            const linkLabels = g.append('g')
+                .selectAll('text')
+                .data(data.links)
+                .enter().append('text')
+                .attr('font-size', '10px')
+                .attr('fill', '#666')
+                .attr('text-anchor', 'middle')
+                .attr('dy', -5)
+                .text(d => d.label);
+            
+            // Nodes
+            const node = g.append('g')
+                .selectAll('g')
+                .data(data.nodes)
+                .enter().append('g')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+            
+            // Node circles
+            node.append('circle')
+                .attr('r', 15)
+                .attr('fill', d => color(d.group))
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 3);
+            
+            // Node labels
+            node.append('text')
+                .attr('dx', 20)
+                .attr('dy', 4)
+                .attr('font-size', '12px')
+                .attr('font-weight', 'bold')
+                .attr('fill', '#333')
+                .text(d => d.name);
+            
+            // Tooltips
+            node.append('title')
+                .text(d => `${d.name} (${d.type})`);
+            
+            // Update positions
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                linkLabels
+                    .attr('x', d => (d.source.x + d.target.x) / 2)
+                    .attr('y', d => (d.source.y + d.target.y) / 2);
+                
+                node.attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+            
+            // Legend
+            const legend = svg.append('g')
+                .attr('transform', `translate(${width - 150}, 20)`);
+            
+            const nodeTypes = [...new Set(data.nodes.map(n => n.type))];
+            nodeTypes.forEach((type, i) => {
+                const legendItem = legend.append('g')
+                    .attr('transform', `translate(0, ${i * 25})`);
+                
+                legendItem.append('circle')
+                    .attr('r', 6)
+                    .attr('fill', color(i + 1));
+                
+                legendItem.append('text')
+                    .attr('x', 15)
+                    .attr('y', 4)
+                    .attr('font-size', '12px')
+                    .text(type.charAt(0).toUpperCase() + type.slice(1));
+            });
+            
+            // Title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', 25)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '18px')
+                .attr('font-weight', 'bold')
+                .text('Real Knowledge Graph Data');
+            
+            // Drag functions
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+        
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            console.log('🎯 Page loaded, auto-loading visualization...');
+            setTimeout(loadVisualization, 1000);
+        });
+    </script>
+</body>
+</html>

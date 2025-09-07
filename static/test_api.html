@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPCIS KG API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>EPCIS Knowledge Graph API Test</h1>
+    
+    <div id="statistics-test" class="test">
+        <h3>Statistics API Test</h3>
+        <div>Loading...</div>
+    </div>
+    
+    <div id="ontologies-test" class="test">
+        <h3>Ontologies API Test</h3>
+        <div>Loading...</div>
+    </div>
+    
+    <div id="sparql-test" class="test">
+        <h3>SPARQL Query API Test</h3>
+        <div>Loading...</div>
+    </div>
+    
+    <div id="monitoring-test" class="test">
+        <h3>Monitoring API Test</h3>
+        <div>Loading...</div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api/v1';
+        
+        async function testAPI(endpoint, testName) {
+            try {
+                console.log(`Testing ${endpoint}...`);
+                const response = await fetch(`${API_BASE}/${endpoint}`);
+                console.log(`${endpoint} response status:`, response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log(`${endpoint} response data:`, data);
+                
+                const testDiv = document.getElementById(testName);
+                testDiv.className = 'test success';
+                testDiv.innerHTML = `
+                    <h4>✅ ${testName.replace('-', ' ').toUpperCase()} - SUCCESS</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                return data;
+            } catch (error) {
+                console.error(`Error testing ${endpoint}:`, error);
+                const testDiv = document.getElementById(testName);
+                testDiv.className = 'test error';
+                testDiv.innerHTML = `
+                    <h4>❌ ${testName.replace('-', ' ').toUpperCase()} - FAILED</h4>
+                    <p>Error: ${error.message}</p>
+                `;
+                return null;
+            }
+        }
+        
+        async function testSPARQL() {
+            try {
+                console.log('Testing SPARQL query...');
+                const response = await fetch(`${API_BASE}/sparql/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: 'SELECT * WHERE { ?s ?p ?o } LIMIT 5'
+                    })
+                });
+                
+                console.log('SPARQL response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('SPARQL response data:', data);
+                
+                const testDiv = document.getElementById('sparql-test');
+                testDiv.className = 'test success';
+                testDiv.innerHTML = `
+                    <h4>✅ SPARQL QUERY - SUCCESS</h4>
+                    <p>Status: ${data.status}</p>
+                    <p>Results: ${data.results ? data.results.bindings.length : 0} bindings</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                return data;
+            } catch (error) {
+                console.error('Error testing SPARQL:', error);
+                const testDiv = document.getElementById('sparql-test');
+                testDiv.className = 'test error';
+                testDiv.innerHTML = `
+                    <h4>❌ SPARQL QUERY - FAILED</h4>
+                    <p>Error: ${error.message}</p>
+                `;
+                return null;
+            }
+        }
+        
+        // Run all tests
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Starting API tests...');
+            
+            await testAPI('statistics', 'statistics-test');
+            await testAPI('ontologies', 'ontologies-test');
+            await testSPARQL();
+            await testAPI('monitoring/health', 'monitoring-test');
+            
+            console.log('All API tests completed!');
+        });
+    </script>
+</body>
+</html>

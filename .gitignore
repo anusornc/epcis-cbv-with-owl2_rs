@@ -1,1 +1,115 @@
-/target
+# Rust
+/target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+debug*.log
+test*.log
+diagnostic*.log
+e2e_test*.log
+server*.log
+
+# Data files
+data/
+*.ttl
+*.json
+store_metadata.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Documentation
+docs/*.pdf
+docs/*.docx
+
+# Test output
+test_output/
+bench_output/
+
+# Coverage reports
+tarpaulin-report.html
+coverage/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+
+# Cache
+.cache/
+*.cache
+
+# Node.js (if any frontend dependencies)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build
+dist/
+build/
+
+# Archives
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Temporary directories
+tmp/
+temp/
+
+# Wasm output
+wasm/pkg/
+wasm/target/
+
+# Leptos specific
+dist/pkg/
+
+# Static assets (if generated)
+static/dist/
+static/build/
