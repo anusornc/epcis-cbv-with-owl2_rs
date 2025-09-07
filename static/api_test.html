@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPARQL API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .result { margin: 10px 0; padding: 10px; background: #f9f9f9; border-radius: 3px; }
+        .error { color: red; }
+        .success { color: green; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>SPARQL API Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>Simple Query Test</h2>
+        <button onclick="testSimpleQuery()">Test Simple Query</button>
+        <div id="simple-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Complex Query Test</h2>
+        <button onclick="testComplexQuery()">Test Complex Query</button>
+        <div id="complex-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Very Complex Query Test</h2>
+        <button onclick="testVeryComplexQuery()">Test Very Complex Query</button>
+        <div id="verycomplex-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8082/api/v1';
+        
+        async function testSimpleQuery() {
+            const resultDiv = document.getElementById('simple-result');
+            resultDiv.innerHTML = '<div class="result">Testing...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/sparql/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: 'SELECT ?s ?name WHERE { ?s <http://example.com/name> ?name } LIMIT 5'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Simple query result:', data);
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <div class="result success">✓ Simple Query Successful</div>
+                        <div class="result">
+                            <strong>Variables:</strong> ${data.head.vars.join(', ')}<br>
+                            <strong>Results:</strong> ${data.results.bindings.length} found
+                        </div>
+                        <div class="result">
+                            ${formatResults(data)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">✗ Simple Query Failed: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">✗ Simple Query Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testComplexQuery() {
+            const resultDiv = document.getElementById('complex-result');
+            resultDiv.innerHTML = '<div class="result">Testing...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/sparql/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: 'SELECT ?event ?eventTime WHERE { ?event <urn:epcglobal:epcis:eventTime> ?eventTime } LIMIT 5'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Complex query result:', data);
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <div class="result success">✓ Complex Query Successful</div>
+                        <div class="result">
+                            <strong>Variables:</strong> ${data.head.vars.join(', ')}<br>
+                            <strong>Results:</strong> ${data.results.bindings.length} found
+                        </div>
+                        <div class="result">
+                            ${formatResults(data)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">✗ Complex Query Failed: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">✗ Complex Query Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testVeryComplexQuery() {
+            const resultDiv = document.getElementById('verycomplex-result');
+            resultDiv.innerHTML = '<div class="result">Testing...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/sparql/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: 'SELECT ?event ?disposition ?quantity WHERE { ?event <urn:epcglobal:epcis:disposition> ?disposition . ?event <urn:epcglobal:epcis:quantity> ?quantity } ORDER BY ?event LIMIT 5'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Very Complex query result:', data);
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <div class="result success">✓ Very Complex Query Successful</div>
+                        <div class="result">
+                            <strong>Variables:</strong> ${data.head.vars.join(', ')}<br>
+                            <strong>Results:</strong> ${data.results.bindings.length} found
+                        </div>
+                        <div class="result">
+                            ${formatResults(data)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">✗ Very Complex Query Failed: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">✗ Very Complex Query Error: ${error.message}</div>`;
+            }
+        }
+        
+        function formatResults(data) {
+            if (!data.results || !data.results.bindings || data.results.bindings.length === 0) {
+                return '<p>No results found</p>';
+            }
+            
+            const vars = data.head.vars;
+            const bindings = data.results.bindings;
+            
+            let html = '<table><thead><tr>';
+            vars.forEach(v => {
+                html += `<th>${v}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            bindings.forEach(binding => {
+                html += '<tr>';
+                vars.forEach(v => {
+                    const value = binding[v];
+                    if (value) {
+                        let displayValue = value.value;
+                        if (value.type === 'uri') {
+                            displayValue = `<a href="${value.value}" target="_blank">${value.value}</a>`;
+                        }
+                        html += `<td>${displayValue}</td>`;
+                    } else {
+                        html += '<td>-</td>';
+                    }
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+    </script>
+</body>
+</html>

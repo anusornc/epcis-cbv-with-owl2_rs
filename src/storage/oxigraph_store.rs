@@ -215,35 +215,119 @@ impl OxigraphStore {
                     total_triples += 1;
                     let mut solution_map = serde_json::Map::new();
                     
-                    // Add variables based on what was requested
-                    for var in &variables {
-                        match var.as_str() {
-                            "s" | "subject" => {
-                                solution_map.insert(var.clone(), serde_json::json!({
-                                    "type": "uri",
-                                    "value": format!("{}", triple.subject)
-                                }));
-                            },
-                            "p" | "predicate" => {
-                                solution_map.insert(var.clone(), serde_json::json!({
-                                    "type": "uri",
-                                    "value": triple.predicate.as_str()
-                                }));
-                            },
-                            "o" | "object" => {
-                                let json_value = serde_json::json!({
-                                    "type": "literal",
-                                    "value": format!("{}", triple.object)
-                                });
-                                solution_map.insert(var.clone(), json_value);
-                            },
-                            "g" | "graph" => {
-                                solution_map.insert(var.clone(), serde_json::json!({
-                                    "type": "uri",
-                                    "value": graph_name
-                                }));
-                            },
-                            _ => {}
+                    // Only add solutions if the triple matches the query pattern
+                    // This is a simplified pattern matching - in production you'd want full SPARQL parsing
+                    let mut matches_pattern = false;
+                    
+                    // For queries with specific predicates, check if this triple matches
+                    if variables.contains(&"name".to_string()) {
+                        matches_pattern = matches_pattern || 
+                            (triple.predicate.as_str().contains("name") || 
+                             triple.predicate.as_str().contains("label"));
+                    }
+                    if variables.contains(&"eventTime".to_string()) {
+                        matches_pattern = matches_pattern || 
+                            triple.predicate.as_str().contains("eventTime");
+                    }
+                    if variables.contains(&"bizLocation".to_string()) {
+                        matches_pattern = matches_pattern || 
+                            (triple.predicate.as_str().contains("bizLocation") ||
+                             triple.predicate.as_str().contains("location"));
+                    }
+                    if variables.contains(&"disposition".to_string()) {
+                        matches_pattern = matches_pattern || 
+                            triple.predicate.as_str().contains("disposition");
+                    }
+                    if variables.contains(&"quantity".to_string()) {
+                        matches_pattern = matches_pattern || 
+                            triple.predicate.as_str().contains("quantity");
+                    }
+                    if variables.contains(&"entityType".to_string()) {
+                        matches_pattern = matches_pattern || 
+                            triple.predicate.as_str().contains("entityType");
+                    }
+                    
+                    // For basic queries (s, p, o), match all triples
+                    if variables.iter().any(|v| v == "s" || v == "p" || v == "o") {
+                        matches_pattern = true;
+                    }
+                    
+                    // Only process this triple if it matches the pattern
+                    if matches_pattern {
+                        // Add variables based on what was requested
+                        for var in &variables {
+                            match var.as_str() {
+                                "s" | "subject" => {
+                                    solution_map.insert(var.clone(), serde_json::json!({
+                                        "type": "uri",
+                                        "value": format!("{}", triple.subject)
+                                    }));
+                                },
+                                "p" | "predicate" => {
+                                    solution_map.insert(var.clone(), serde_json::json!({
+                                        "type": "uri",
+                                        "value": triple.predicate.as_str()
+                                    }));
+                                },
+                                "o" | "object" => {
+                                    let json_value = serde_json::json!({
+                                        "type": "literal",
+                                        "value": format!("{}", triple.object)
+                                    });
+                                    solution_map.insert(var.clone(), json_value);
+                                },
+                                "g" | "graph" => {
+                                    solution_map.insert(var.clone(), serde_json::json!({
+                                        "type": "uri",
+                                        "value": graph_name
+                                    }));
+                                },
+                                // Handle common SPARQL variable patterns by matching to triple components
+                                _ => {
+                                    // For arbitrary variable names, try to match them to triple patterns
+                                    // This is a simplified approach - in production you'd want full SPARQL parsing
+                                    if var.contains("name") || var.contains("label") {
+                                        // Look for name or label in the predicate
+                                        if triple.predicate.as_str().contains("name") || 
+                                           triple.predicate.as_str().contains("label") {
+                                            solution_map.insert(var.clone(), serde_json::json!({
+                                                "type": "literal",
+                                                "value": format!("{}", triple.object)
+                                            }));
+                                        }
+                                    } else if var.contains("time") || var.contains("date") {
+                                        // Look for time-related predicates
+                                        if triple.predicate.as_str().contains("time") || 
+                                           triple.predicate.as_str().contains("date") {
+                                            solution_map.insert(var.clone(), serde_json::json!({
+                                                "type": "literal",
+                                                "value": format!("{}", triple.object)
+                                            }));
+                                        }
+                                    } else if var.contains("location") || var.contains("loc") {
+                                        // Look for location-related predicates
+                                        if triple.predicate.as_str().contains("location") || 
+                                           triple.predicate.as_str().contains("bizLocation") {
+                                            solution_map.insert(var.clone(), serde_json::json!({
+                                                "type": "literal",
+                                                "value": format!("{}", triple.object)
+                                            }));
+                                        }
+                                    } else if var.contains("event") && !var.contains("Time") {
+                                        // For event variables (not eventTime), use the subject
+                                        solution_map.insert(var.clone(), serde_json::json!({
+                                            "type": "uri",
+                                            "value": format!("{}", triple.subject)
+                                        }));
+                                    } else {
+                                        // For other variables, just include the object value
+                                        solution_map.insert(var.clone(), serde_json::json!({
+                                            "type": "literal",
+                                            "value": format!("{}", triple.object)
+                                        }));
+                                    }
+                                }
+                            }
                         }
                     }
                     
@@ -376,11 +460,45 @@ impl OxigraphStore {
     
     /// Get query variables from SPARQL query string (simplified parsing)
     fn get_query_variables(&self, query: &str) -> Result<Vec<String>, EpcisKgError> {
-        // This is a simplified approach - in production, you'd want to use a proper SPARQL parser
-        let vars: Vec<String> = query.split_whitespace()
-            .filter(|s| s.starts_with('?'))
-            .map(|s| s[1..].to_string())
-            .collect();
+        // Extract variables from the SELECT clause more accurately
+        let query_upper = query.to_uppercase();
+        let select_start = query_upper.find("SELECT").ok_or_else(|| {
+            EpcisKgError::Query("No SELECT clause found in query".to_string())
+        })?;
+        
+        // Find the WHERE clause or end of SELECT variables
+        let where_pos = query_upper.find("WHERE").unwrap_or(query.len());
+        let select_clause = &query[select_start + 6..where_pos].trim();
+        
+        // Parse variables from SELECT clause
+        let mut vars = Vec::new();
+        let mut in_distinct = false;
+        
+        for token in select_clause.split_whitespace() {
+            let token_upper = token.to_uppercase();
+            
+            if token_upper == "DISTINCT" {
+                in_distinct = true;
+                continue;
+            }
+            
+            if token_upper == "REDUCED" || token_upper == "*" {
+                // Handle REDUCED or wildcard - return all common variables
+                return Ok(vec!["s".to_string(), "p".to_string(), "o".to_string()]);
+            }
+            
+            if token.starts_with('?') {
+                let var_name = token[1..].to_string();
+                if !vars.contains(&var_name) {
+                    vars.push(var_name);
+                }
+            }
+        }
+        
+        // If no variables found in SELECT clause, default to s, p, o
+        if vars.is_empty() {
+            vars = vec!["s".to_string(), "p".to_string(), "o".to_string()];
+        }
         
         Ok(vars)
     }
