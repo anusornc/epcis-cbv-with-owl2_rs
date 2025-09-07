@@ -93,6 +93,9 @@ yarn-error.log*
 dist/
 build/
 
+# Claude Code
+.claude/
+
 # Archives
 *.tar.gz
 *.zip
