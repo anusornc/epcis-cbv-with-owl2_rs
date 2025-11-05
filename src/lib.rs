@@ -1,5 +1,6 @@
 pub mod api;
 pub mod benchmarks;
+pub mod blockchain;
 pub mod config;
 pub mod models;
 pub mod monitoring;
@@ -53,6 +54,15 @@ pub enum EpcisKgError {
     
     #[error("Generic error: {0}")]
     Generic(#[from] Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("Blockchain error: {0}")]
+    Blockchain(String),
+
+    #[error("Consensus error: {0}")]
+    Consensus(String),
+
+    #[error("Cryptography error: {0}")]
+    Crypto(String),
 }
 
 // Re-export the new AppConfig for backwards compatibility

@@ -1,17 +1,17 @@
 [package]
 name = "epcis-knowledge-graph"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Your Name <your.email@example.com>"]
-description = "EPCIS Knowledge Graph demo combining owl2_rs reasoning with Oxigraph storage"
+description = "EPCIS Blockchain with Knowledge Graph - OWL2 reasoning, PoA consensus, and supply chain traceability"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/yourusername/epcis-knowledge-graph"
-keywords = ["epcis", "knowledge-graph", "owl2", "rdf", "sparql", "supply-chain"]
-categories = ["database", "web-programming", "science"]
+keywords = ["epcis", "blockchain", "knowledge-graph", "owl2", "supply-chain", "traceability"]
+categories = ["database", "web-programming", "science", "cryptography"]
 
 [dependencies]
-# Local owl2_rs library
-owl2_rs = { path = "../owl2_rs" }
+# OWL2 Reasoner - Full SROIQ(D) with EPCIS 2.0 support
+owl2-reasoner = { git = "https://github.com/anusornc/owl2-reasoner" }
 
 # RDF ecosystem - Using parsing components and in-memory SPARQL evaluation
 oxrdf = "0.2"
@@ -53,6 +53,22 @@ uuid = { version = "1.0", features = ["v4", "serde"] }
 
 # Parallel processing
 rayon = "1.8"
+
+# Blockchain cryptography
+sha2 = "0.10"
+ed25519-dalek = { version = "2.1", features = ["serde"] }
+hex = "0.4"
+bs58 = "0.5"
+
+# Networking (for P2P blockchain)
+libp2p = { version = "0.53", features = ["tcp", "dns", "gossipsub", "identify", "kad", "noise", "yamux"] }
+tokio-util = "0.7"
+
+# Concurrent data structures
+dashmap = "5.5"
+
+# Serialization (blockchain)
+bincode = "1.3"
 
 # Basic web utilities for simple frontend
 wasm-bindgen = "0.2"
